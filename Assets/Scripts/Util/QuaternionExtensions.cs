@@ -30,14 +30,6 @@ namespace TiltBrush
 #pragma warning restore 0612, 0618
         }
 
-        /// Like Quaternion.ToAngleAxis, but returns angle in radians.
-        public static void ToAngleAxisRad(this Quaternion q, out float angle, out Vector3 axis)
-        {
-#pragma warning disable 0612, 0618
-            q.ToAxisAngle(out axis, out angle);
-#pragma warning restore 0612, 0618
-        }
-
         /// Quaternion logarithm; returns something like an angle-axis.
         /// Assumes q is a unit quaternion (saves some work, more stable).
         ///
@@ -134,31 +126,6 @@ namespace TiltBrush
         {
             return new Vector3(q.x, q.y, q.z);
         }
-        /// Returns the real/scalar portion of q
-        public static float Re(this Quaternion q)
-        {
-            return q.w;
-        }
-
-        /// returns true if the Quaternion is not (0,0,0,0)
-        public static bool IsInitialized(this Quaternion q)
-        {
-            return q.x != 0 || q.y != 0 || q.z != 0 || q.w != 0;
-        }
-
-        /// Analagous to Vector3.normalized (except this isn't a read-only property)
-        public static Quaternion normalized(this Quaternion q)
-        {
-            Vector4 v = new Vector4(q.x, q.y, q.z, q.w).normalized;
-            return new Quaternion(v.x, v.y, v.z, v.w);
-        }
-
-        /// Analagous to Vector4.magnitude (except this isn't a read-only property)
-        public static float magnitude(this Quaternion q)
-        {
-            Vector4 v = new Vector4(q.x, q.y, q.z, q.w);
-            return v.magnitude;
-        }
 
         /// Workaround for Unity's Quaternion.Inverse not dividing by sqrMagnitude
         public static Quaternion TrueInverse(this Quaternion q)
@@ -166,21 +133,6 @@ namespace TiltBrush
             Vector4 v = new Vector4(q.x, q.y, q.z, q.w);
             float f = 1f / v.sqrMagnitude;
             return new Quaternion(-q.x * f, -q.y * f, -q.z * f, q.w * f);
-        }
-
-        /// Workaround for Unity's Quaternion.operator == failing for non-unit
-        /// quaternions (in particular, (0,0,0,0)), and for it being approximate.
-        public static bool TrueEquals(this Quaternion q, Quaternion rhs)
-        {
-            return (q.x == rhs.x && q.y == rhs.y && q.z == rhs.z && q.w == rhs.w);
-        }
-
-        /// Workaround for Unity's Quaternion.operator != failing for non-unit
-        /// quaternions (in particular, (0,0,0,0)), and for it being approximate,
-        /// and for it doing the wrong thing with NaN
-        public static bool TrueNotEquals(this Quaternion q, Quaternion rhs)
-        {
-            return (q.x != rhs.x || q.y != rhs.y || q.z != rhs.z || q.w != rhs.w);
         }
     }
 

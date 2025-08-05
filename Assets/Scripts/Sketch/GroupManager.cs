@@ -18,72 +18,6 @@ using System.Linq;
 
 namespace TiltBrush
 {
-
-    public class GroupManager
-    {
-        public const uint kIdSketchGroupTagNone = 0;
-
-        private UInt32 m_nextUnusedCookie;
-        private Dictionary<UInt32, SketchGroupTag> m_idToGroup;
-
-        public GroupManager()
-        {
-            ResetGroups();
-        }
-
-        public SketchGroupTag NewUnusedGroup()
-        {
-            UInt32 cookie = m_nextUnusedCookie++;
-            return new SketchGroupTag(cookie);
-        }
-
-        /// Converts a serialized id to a SketchGroupTag.
-        /// This is the inverse of what GroupIdMapping does.
-        public SketchGroupTag GetGroupFromId(UInt32 id)
-        {
-            if (id == kIdSketchGroupTagNone)
-            {
-                return SketchGroupTag.None;
-            }
-            else if (m_idToGroup.TryGetValue(id, out SketchGroupTag tag))
-            {
-                return tag;
-            }
-            if (id >= m_nextUnusedCookie)
-            {
-                m_nextUnusedCookie = id + 1;
-            }
-            return m_idToGroup[id] = new SketchGroupTag(id);
-        }
-
-        /// This should be called when the strokes have been cleared.
-        public void ResetGroups()
-        {
-            m_nextUnusedCookie = 1;
-            m_idToGroup = new Dictionary<UInt32, SketchGroupTag>();
-        }
-#if OPENBRUSH
-        public static void MoveStrokesToNewGroups(List<Stroke> strokes, Dictionary<int, int> oldGroupToNewGroup)
-        {
-
-            if (oldGroupToNewGroup == null) oldGroupToNewGroup = new Dictionary<int, int>();
-
-            foreach (var stroke in strokes ?? new List<Stroke>())
-            {
-                if (stroke.Group != SketchGroupTag.None)
-                {
-                    if (!oldGroupToNewGroup.ContainsKey(stroke.Group.GetHashCode()))
-                    {
-                        var newGroup = App.GroupManager.NewUnusedGroup();
-                        oldGroupToNewGroup.Add(stroke.Group.GetHashCode(), newGroup.GetHashCode());
-                    }
-                    stroke.Group = new SketchGroupTag((uint)oldGroupToNewGroup[stroke.Group.GetHashCode()]);
-                }
-            }
-        }
-#endif
-    }
-
     /// A plain old int, with a wrapper type for type-safety
     public struct SketchGroupTag : IEquatable<SketchGroupTag>
     {
@@ -142,26 +76,5 @@ namespace TiltBrush
             throw new InvalidOperationException();
         }
     }
-
-    /// This generates a mapping from groups to consecutive ids.
-    public class GroupIdMapping
-    {
-        private Dictionary<SketchGroupTag, uint> m_GroupToConsecutiveIdMapping =
-            new Dictionary<SketchGroupTag, uint>();
-        private uint m_NextId = GroupManager.kIdSketchGroupTagNone + 1;
-        public uint GetId(SketchGroupTag group)
-        {
-            if (group == SketchGroupTag.None)
-            {
-                return GroupManager.kIdSketchGroupTagNone;
-            }
-            if (!m_GroupToConsecutiveIdMapping.TryGetValue(group, out uint id))
-            {
-                m_GroupToConsecutiveIdMapping[group] = id = m_NextId++;
-            }
-            return id;
-        }
-    }
-
 
 } // namespace TiltBrush

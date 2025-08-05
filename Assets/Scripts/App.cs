@@ -21,24 +21,15 @@ namespace TiltBrush
         public const float METERS_TO_UNITS = 10f;
         public const float UNITS_TO_METERS = .1f;
         private static App m_Instance;
-#if OPENBRUSH
-        public static PlatformConfig PlatformConfig => Config.PlatformConfig;
-        public static CanvasScript ActiveCanvas => Scene.ActiveCanvas;
-#else
         public CanvasScript m_Canvas;
         public static CanvasScript ActiveCanvas => Instance.m_Canvas;
         public PointerScript m_PointerForNonOpenBrush;
-#endif
         public static App Instance
         {
             get { return m_Instance; }
-#if UNITY_EDITOR
-            internal set { m_Instance = value; }
-#endif
         }
         [SerializeField] private TiltBrushManifest m_ManifestStandard;
         [SerializeField] private TiltBrushManifest m_ManifestExperimental;
-        [SerializeField] private TiltBrushManifest m_ZapboxManifest;
         private TiltBrushManifest m_ManifestFull;
 
         public TiltBrushManifest ManifestFull
@@ -75,34 +66,20 @@ namespace TiltBrush
                 // If you change this, also modify SketchTimeToLevelLoadTime
                 return Time.timeSinceLevelLoad - m_sketchTimeBase;
             }
-            set
-            {
-                if (value < 0) { throw new ArgumentException("negative"); }
-                m_sketchTimeBase = Time.timeSinceLevelLoad - value;
-            }
         }
 
-#if OPENBRUSH
-        public static PlatformConfig PlatformConfig;
-#endif
         void Awake()
         {
             m_Instance = this;
         }
-#if OPENBRUSH
-        public static Config Config { get; }
-#endif
+
         private TiltBrushManifest MergeManifests()
         {
-#if ZAPBOX_SUPPORTED
-            var manifest = m_ZapboxManifest;
-#else
             var manifest = Instantiate(m_ManifestStandard);
             if (m_ManifestExperimental != null)
             {
                 manifest.AppendFrom(m_ManifestExperimental);
             }
-#endif
             return manifest;
         }
     }

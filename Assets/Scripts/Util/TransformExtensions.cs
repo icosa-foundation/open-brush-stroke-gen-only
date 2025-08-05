@@ -84,7 +84,6 @@ namespace TiltBrush
             public TrTransform this[Transform t]
             {
                 get { return TrTransform.FromTransform(t); }
-                set { value.ToTransform(t); }
             }
         }
 
@@ -99,69 +98,6 @@ namespace TiltBrush
             readonly Transform m_parent;
             GlobalAccessor AsGlobal;
             LocalAccessor AsLocal;
-
-            public RelativeAccessor(Transform parent)
-            {
-                m_parent = parent;
-                AsGlobal = new GlobalAccessor();
-                AsLocal = new LocalAccessor();
-            }
-
-            public TrTransform this[Transform target]
-            {
-                // Value being get/set is relative to m_parent; the fundamental invariant is:
-                //   target.global = m_parent.global * value
-                get
-                {
-                    // This works, but loses precision
-                    // return AsGlobal[m_parent].inverse * AsGlobal[target];
-                    if (target == m_parent)
-                    {
-                        return TrTransform.identity;
-                    }
-                    // Concatenate up to the root, or to m_parent, whichever comes first.
-                    var concatenated = AsLocal[target];
-                    for (var ancestor = target.parent; ancestor != null; ancestor = ancestor.parent)
-                    {
-                        if (ancestor == m_parent)
-                        {
-                            return concatenated;
-                        }
-                        else
-                        {
-                            concatenated = AsLocal[ancestor] * concatenated;
-                        }
-                    }
-                    // And project down into m_parent's coordinate system
-                    return TrTransform.InvMul(AsGlobal[m_parent], concatenated);
-                }
-
-                set
-                {
-                    // This works, but loses precision
-                    // AsGlobal[target] = AsGlobal[m_parent] * value;
-                    if (target == m_parent)
-                    {
-                        throw new System.InvalidOperationException("Can't set transform relative to self");
-                    }
-                    // Concatenate up to the root, or to m_parent, whichever comes first.
-                    // Skip target's local transform, because we're replacing it
-                    var concatenated = TrTransform.identity;
-                    for (var ancestor = target.parent; ancestor != null; ancestor = ancestor.parent)
-                    {
-                        if (ancestor == m_parent)
-                        {
-                            AsLocal[target] = TrTransform.InvMul(concatenated, value);
-                            return;
-                        }
-                        else
-                        {
-                            concatenated = AsLocal[ancestor] * concatenated;
-                        }
-                    }
-                    AsLocal[target] = TrTransform.InvMul(concatenated, AsGlobal[m_parent] * value);
-                }
-            }
         }
     }
 

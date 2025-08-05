@@ -12,13 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Localization;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace TiltBrush
 {
@@ -27,10 +22,6 @@ namespace TiltBrush
     public class TiltBrushManifest : ScriptableObject
     {
         public BrushDescriptor[] Brushes;
-#if OPENBRUSH
-        public Environment[] Environments;
-#endif
-        public Locale[] Locales;
         public BrushDescriptor[] CompatibilityBrushes;
 
         // lhs = lhs + rhs, with duplicates removed.
@@ -45,43 +36,8 @@ namespace TiltBrush
         public void AppendFrom(TiltBrushManifest rhs)
         {
             AppendUnique(ref Brushes, rhs.Brushes);
-#if OPENBRUSH
-            AppendUnique(ref Environments, rhs.Environments);
-#endif
             AppendUnique(ref CompatibilityBrushes, rhs.CompatibilityBrushes);
         }
 
-        private IEnumerable<BrushDescriptor> AllBrushesAndAncestors()
-        {
-            foreach (var brush in Brushes.Concat(CompatibilityBrushes))
-            {
-                for (var current = brush; current != null; current = current.m_Supersedes)
-                {
-                    yield return current;
-                }
-            }
-        }
-
-        /// Returns a list of unique brushes in the given manifest,
-        /// including any ancestor brushes implicitly present.
-        public List<BrushDescriptor> UniqueBrushes()
-        {
-            return AllBrushesAndAncestors()
-                .Distinct()
-                .ToList();
-        }
-#if OPENBRUSH
-        [ContextMenu("Export Brush GUIDs")]
-        public void ExportBrushGuids()
-        {
-#if UNITY_EDITOR
-            string path =
-                EditorUtility.SaveFilePanel("Save Brush Guids", Application.dataPath, "BrushGuids", ".txt");
-            string[] guids =
-                Brushes.Select(x => string.Format("{0},{1}", x.m_Guid.ToString(), x.DurableName)).ToArray();
-            System.IO.File.WriteAllLines(path, guids);
-#endif
-        }
-#endif
     } // TiltBrushManifest
 } // namespace TiltBrush

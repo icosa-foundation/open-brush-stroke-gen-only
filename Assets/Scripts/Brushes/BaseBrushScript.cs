@@ -82,15 +82,6 @@ namespace TiltBrush
             currentLine.InitBrush(desc, xfInParentSpace);
             return currentLine;
         }
-#if OPENBRUSH
-        // used for batched strokes. not overridable
-        public static float GetStrokeCost(BrushDescriptor desc, int verts, float size)
-        {
-            return (verts / 6)
-                * QualityControls.m_Instance.AppQualityLevels.GetWeightForBrush(desc.m_Guid)
-                * size;
-        }
-#endif
         #endregion
 
         readonly public bool m_bCanBatch;

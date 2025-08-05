@@ -44,10 +44,7 @@ namespace TiltBrush
         public CanvasScript m_PreviousCanvas;
         /// Valid only when type == BrushStroke. Never null; will always have a BaseBrushScript.
         public GameObject m_Object;
-#if OPENBRUSH
-        /// Valid only when type == BatchedBrushStroke.
-        public BatchSubset m_BatchSubset;
-#endif
+
         /// used by SketchMemoryScript.m_Instance.m_MemoryList (ordered by time)
         public LinkedListNode<Stroke> m_NodeByTime;
         /// used by one of the lists in ScenePlayback (ordered by time)
@@ -65,10 +62,6 @@ namespace TiltBrush
             {
                 var oldGroup = m_Group;
                 m_Group = value;
-#if OPENBRUSH
-                SelectionManager.m_Instance.OnStrokeRemovedFromGroup(this, oldGroup);
-                SelectionManager.m_Instance.OnStrokeAddedToGroup(this);
-#endif
             }
         }
 
@@ -84,12 +77,6 @@ namespace TiltBrush
                 {
                     return m_IntendedCanvas;
                 }
-#if OPENBRUSH
-                else if (m_Type == Type.BatchedBrushStroke)
-                {
-                    return m_BatchSubset.Canvas;
-                }
-#endif
                 else if (m_Type == Type.BrushStroke)
                 {
                     // Null checking is needed because sketches that fail to load
@@ -102,28 +89,6 @@ namespace TiltBrush
                 }
             }
         }
-
-        /// True if stroke's geometry exists and is active.  E.g. prior to playback, strokes
-        /// will not have a geometry representation in the scene.  Strokes which are erased
-        /// but available for redo will have inactive geometry.
-        public bool IsGeometryEnabled
-        {
-            get
-            {
-#if OPENBRUSH
-                return this.m_Object != null && this.m_Object.activeSelf ||
-                    m_Type == Type.BatchedBrushStroke &&
-                    m_BatchSubset.m_Active;
-#else
-                return m_Object != null && m_Object.activeSelf;
-#endif
-            }
-        }
-
-        /// True if this stroke should be displayed on playback (i.e. not an erased or undone stroke).
-        /// TODO: the setter is never used -- is that a bug, or should we remove the field?
-        public bool IsVisibleForPlayback { get; /*set;*/ } = true;
-
         public uint HeadTimestampMs
         {
             get { return this.m_ControlPoints[0].m_TimestampMs; }
@@ -134,40 +99,12 @@ namespace TiltBrush
             get { return this.m_ControlPoints.Last().m_TimestampMs; }
         }
 
+
         public float SizeInLocalSpace
         {
             get
             {
                 return m_BrushScale * m_BrushSize;
-            }
-        }
-
-        public float SizeInRoomSpace
-        {
-            get
-            {
-                var localToRoom = Coords.AsRoom[this.StrokeTransform];
-                return localToRoom.scale * SizeInLocalSpace;
-            }
-        }
-
-        /// Could be a batch or an individual object
-        public Transform StrokeTransform
-        {
-            get
-            {
-#if OPENBRUSH
-                if (m_Object != null)
-                {
-                    return m_Object.transform;
-                }
-                else
-                {
-                    return m_BatchSubset.m_ParentBatch.transform;
-                }
-#else
-                return m_Object.transform;
-#endif
             }
         }
 
@@ -250,33 +187,9 @@ namespace TiltBrush
                 Object.Destroy(m_Object);
                 m_Object = null;
             }
-#if OPENBRUSH
-            // TODO: instead of destroying, reuse the previous batch space if possible
-            // (but be careful because the brush may have changed). Excessive use of Recreate()
-            // will swiss-cheese our batches.
-            if (m_BatchSubset != null)
-            {
-                // Invalidates subset; tears down Batch <-> Subset link
-                m_BatchSubset.m_ParentBatch.RemoveSubset(m_BatchSubset);
-                // Tear down Subset <-> Stroke link. Removing the Subset <-- Stroke link is
-                // more for cleanliness than correctness; the Subset should get GC'd soon.
-                // Maybe one of these references should be weak?
-                m_BatchSubset.m_Stroke = null;
-                m_BatchSubset = null;
-            }
-#endif
             m_Type = Type.NotCreated;
         }
 
-        /// Like Recreate except the translation are interpreted as a destination point relative to the canvas
-        /// (instead of how much to translate by). Rotation and scale are relative and applied after the translation.
-#if OPENBRUSH
-        public void RecreateAt(TrTransform xf_CS)
-        {
-            TrTransform leftTransform = TrTransform.InvMul(TrTransform.T(m_BatchSubset.m_Bounds.center), xf_CS);
-            Recreate(leftTransform);
-        }
-#endif
         /// Ensure there is geometry for this stroke, creating if necessary.
         /// Optionally also calls SetParent() or LeftTransformControlPoints() before creation.
         ///
@@ -325,28 +238,7 @@ namespace TiltBrush
             }
         }
 
-#if OPENBRUSH
-        /// Similar to Recreate() but takes a fast path by copying geometry from another
-        /// stroke, if possible.
-        /// This only makes sense if the stroke has no geometry, so it's an error otherwise.
-        public void CopyGeometry(CanvasScript targetCanvas, Stroke baseStroke)
-        {
-            if (m_Type != Type.NotCreated)
-            {
-                throw new InvalidOperationException("stroke must be NotCreated");
-            }
-            if (baseStroke.m_Type != Type.BatchedBrushStroke)
-            {
-                throw new InvalidOperationException("baseStroke must have batched geometry");
-            }
-            // Copy buffers directly.  Only works with batched brush stroke.
-            m_BatchSubset = targetCanvas.BatchManager.CreateSubset(baseStroke.m_BatchSubset);
-            m_BatchSubset.m_Stroke = this;
-            m_Object = null;
-            m_IntendedCanvas = null;
-            m_Type = Type.BatchedBrushStroke;
-        }
-#endif
+
         // TODO: Possibly could optimize this in C++ for 11.5% of time in selection.
         private void LeftTransformControlPoints(TrTransform leftTransform, bool absoluteScale = false)
         {
@@ -396,17 +288,6 @@ namespace TiltBrush
 
             switch (m_Type)
             {
-#if OPENBRUSH
-                case Type.BatchedBrushStroke:
-                    {
-                        // Shortcut: move geometry to new BatchManager rather than recreating from scratch
-                        BatchSubset newSubset = canvas.BatchManager.CreateSubset(m_BatchSubset);
-                        m_BatchSubset.m_ParentBatch.RemoveSubset(m_BatchSubset);
-                        m_BatchSubset = newSubset;
-                        m_BatchSubset.m_Stroke = this;
-                        break;
-                    }
-#endif
                 case Type.BrushStroke:
                     {
                         m_Object.transform.SetParent(canvas.transform, false);
@@ -466,20 +347,6 @@ namespace TiltBrush
                     var pointer = PointerManager.m_Instance.GetTransientPointer(5);
                     pointer.RecreateLineFromMemory(this);
                 }
-#if OPENBRUSH
-                else
-                {
-                    Debug.Assert(m_Type == Type.BatchedBrushStroke);
-
-                    // Shortcut: modify existing geometry to new BatchManager rather than recreating from
-                    // scratch.
-                    BatchSubset newSubset = canvas.BatchManager.CreateSubset(m_BatchSubset, leftTransform);
-                    m_BatchSubset.m_ParentBatch.RemoveSubset(m_BatchSubset);
-                    m_BatchSubset = newSubset;
-                    m_BatchSubset.m_Stroke = this;
-                    LeftTransformControlPoints(leftTransform.Value);
-                }
-#endif
             }
         }
 
@@ -495,110 +362,10 @@ namespace TiltBrush
                         rBrushScript.HideBrush(hide);
                     }
                     break;
-#if OPENBRUSH
-                case Type.BatchedBrushStroke:
-                    var batch = m_BatchSubset.m_ParentBatch;
-                    if (hide)
-                    {
-                        batch.DisableSubset(m_BatchSubset);
-                    }
-                    else
-                    {
-                        batch.EnableSubset(m_BatchSubset);
-                    }
-                    break;
-#endif
                 case Type.NotCreated:
                     Debug.LogError("Unexpected: NotCreated stroke");
                     break;
             }
-#if OPENBRUSH
-            TiltMeterScript.m_Instance.AdjustMeter(this, up: !hide);
-#endif
         }
-
-        private void _CheckValidLayerState()
-        {
-#if OPENBRUSH
-            if (!Canvas.BatchManager.OneStrokePerBatch)
-            {
-                throw new StrokeShaderModifierException($"Please set OneStrokePerBatch=true for this stroke's layer");
-            }
-#endif
-        }
-#if OPENBRUSH
-        public void SetShaderClipping(float clipStart, float clipEnd)
-        {
-            _CheckValidLayerState();
-            var batch = m_BatchSubset.m_ParentBatch;
-            var material = batch.InstantiatedMaterial;
-            if (!material.HasFloat("_ClipStart") || !material.HasFloat("_ClipEnd"))
-            {
-                throw new StrokeShaderModifierException($"Brush material {material.name} does not support shader clipping");
-            }
-            float startIndex = clipStart * batch.Geometry.NumVerts;
-            float endIndex = clipEnd * batch.Geometry.NumVerts;
-            batch.InstantiatedMaterial.EnableKeyword("SHADER_SCRIPTING_ON");
-            batch.InstantiatedMaterial.SetFloat("_ClipStart", startIndex);
-            batch.InstantiatedMaterial.SetFloat("_ClipEnd", endIndex);
-        }
-
-        public void SetShaderFloat(string parameter, float value)
-        {
-            _CheckValidLayerState();
-            var batch = m_BatchSubset.m_ParentBatch;
-            if (ApiManager.ParameterRequiresScriptingKeyword(parameter))
-            {
-                batch.InstantiatedMaterial.EnableKeyword("SHADER_SCRIPTING_ON");
-            }
-            var material = batch.InstantiatedMaterial;
-            if (!material.HasFloat(parameter))
-            {
-                throw new StrokeShaderModifierException($"Brush material {material.name} does not have a float parameter named {parameter}");
-            }
-            material.SetFloat(parameter, value);
-        }
-
-        public void SetShaderColor(string parameter, ColorApiWrapper color)
-        {
-            _CheckValidLayerState();
-            var batch = m_BatchSubset.m_ParentBatch;
-            var material = batch.InstantiatedMaterial;
-            if (!material.HasColor(parameter))
-            {
-                throw new StrokeShaderModifierException($"Brush material {material.name} does not have a Color parameter named {parameter}");
-            }
-            batch.InstantiatedMaterial.SetColor(parameter, color._Color);
-        }
-
-        public void SetShaderTexture(string parameter, Texture2D image)
-        {
-            _CheckValidLayerState();
-            var batch = m_BatchSubset.m_ParentBatch;
-            var material = batch.InstantiatedMaterial;
-            if (!material.HasTexture(parameter))
-            {
-                throw new StrokeShaderModifierException($"Brush material {material.name} does not have a Texture parameter named {parameter}");
-            }
-            batch.InstantiatedMaterial.SetTexture(parameter, image);
-        }
-
-        public void SetShaderVector(string parameter, float x, float y = 0, float z = 0, float w = 0)
-        {
-            _CheckValidLayerState();
-            var batch = m_BatchSubset.m_ParentBatch;
-            var material = batch.InstantiatedMaterial;
-            if (!material.HasVector(parameter))
-            {
-                throw new StrokeShaderModifierException($"Brush material {material.name} does not have a vector parameter named {parameter}");
-            }
-            batch.InstantiatedMaterial.SetVector(parameter, new Vector4(x, y, z, w));
-        }
-#endif
-    }
-    
-    public class StrokeShaderModifierException : NotSupportedException
-    {
-        public StrokeShaderModifierException(string s) : base(s) { }
     }
 } // namespace TiltBrush

@@ -33,30 +33,6 @@ namespace TiltBrush
     public static class Coords
     {
         // Unless otherwise noted, transforms are in global coordinates
-#if OPENBRUSH
-        /// Deprecated: use PoseChanged on a canvas instance
-        public static event CanvasScript.PoseChangedEventHandler CanvasPoseChanged
-        {
-            add { App.Scene.MainCanvas.PoseChanged += value; }
-            remove { App.Scene.MainCanvas.PoseChanged -= value; }
-        }
-
-        /// Deprecated. Fix code to remove single-canvas assumptions,
-        /// then replace with App.ActiveCanvas.Pose
-        public static TrTransform CanvasPose
-        {
-            get { return App.ActiveCanvas.Pose; }
-            set { App.ActiveCanvas.Pose = value; }
-        }
-
-        /// Deprecated. Fix code to remove single-canvas assumptions,
-        /// then replace with App.ActiveCanvas.LocalPose
-        public static TrTransform CanvasLocalPose
-        {
-            get { return App.ActiveCanvas.LocalPose; }
-            set { App.ActiveCanvas.LocalPose = value; }
-        }
-#endif
         /// Helpers for getting and setting transforms on Transform components.
         /// Transform natively allows you to access parent-relative ("local")
         /// and root-relative ("global") views of position, rotation, and scale.
@@ -81,13 +57,5 @@ namespace TiltBrush
         public static TransformExtensions.RelativeAccessor AsCanvas;
 
         // Internal
-#if OPENBRUSH
-        public static void Init(App app)
-        {
-            AsCanvas = new TransformExtensions.RelativeAccessor(app.m_CanvasTransform);
-            // Room coordinate system === Unity global coordinate system
-            AsRoom = new TransformExtensions.GlobalAccessor();
-        }
-#endif
     }
 } // namespace TiltBrush

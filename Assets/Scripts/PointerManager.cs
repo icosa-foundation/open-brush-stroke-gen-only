@@ -39,11 +39,6 @@ namespace TiltBrush
             public Vector3 m_Pos;
             public Quaternion m_Orient;
 
-#if OPENBRUSH
-            public const uint EXTENSIONS = (uint)(
-                SketchWriter.ControlPointExtension.Pressure |
-                SketchWriter.ControlPointExtension.Timestamp);
-#endif
             public float m_Pressure;
             public uint m_TimestampMs; // CurrentSketchTime of creation, in milliseconds
         }
@@ -59,11 +54,7 @@ namespace TiltBrush
         // Raise exception if not enough pointers
         public PointerScript GetTransientPointer(int i)
         {
-#if OPENBRUSH
-            return m_Pointers[NumUserPointers + i].m_Script;
-#else
             return App.Instance.m_PointerForNonOpenBrush;
-#endif
         }
         void Awake()
         {
@@ -72,11 +63,7 @@ namespace TiltBrush
 
         public bool IsMainPointerProcessingLine()
         {
-#if OPENBRUSH
-            return m_CurrentLineCreationState == LineCreationState.ProcessingStraightEdge;
-#else
             return false;
-#endif
         }
     }
 } // namespace TiltBrush
