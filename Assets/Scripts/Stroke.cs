@@ -60,16 +60,15 @@ namespace TiltBrush
         public SketchGroupTag Group
         {
             get => m_Group;
-#if OPENBRUSH
             set
             {
                 var oldGroup = m_Group;
                 m_Group = value;
-
+#if OPENBRUSH
                 SelectionManager.m_Instance.OnStrokeRemovedFromGroup(this, oldGroup);
                 SelectionManager.m_Instance.OnStrokeAddedToGroup(this);
-            }
 #endif
+            }
         }
 
         /// Which control points on the stroke should be dropped due to simplification

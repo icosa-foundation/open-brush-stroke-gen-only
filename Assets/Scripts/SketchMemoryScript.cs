@@ -98,6 +98,7 @@ namespace TiltBrush
         //      by-time order matches edit order for sketches with no timestamps, and moreover that
         //      stroke grouping is preserved
         //
+#endif
         // Why we can get away with linked list performance for sequence time ordering:
         //    * load case:  sort once at init to populate sequence-time list.  Since we save in
         //      timestamp order, this should be O(N).
@@ -112,7 +113,6 @@ namespace TiltBrush
         // TODO: Have Update() advance this position to match current sketch time so that we
         // amortize list traversal in timeline edit mode.
         private LinkedListNode<Stroke> m_CurrentNodeByTime;
-
         //for loading .sketches
         public enum PlaybackMode
         {
@@ -120,7 +120,7 @@ namespace TiltBrush
             Timestamps,
         }
         private IScenePlayback m_ScenePlayback;
-
+#if OPENBRUSH
         /// discern between initial and edit-time playback in timeline edit mode
         private bool m_IsInitialPlay;
         private PlaybackMode m_PlaybackMode;
@@ -194,12 +194,12 @@ namespace TiltBrush
         {
             get { return m_MemoryList.Count; }
         }
-
+#endif
         public LinkedList<Stroke> GetMemoryList
         {
             get { return m_MemoryList; }
         }
-
+#if OPENBRUSH
         public IEnumerable<BaseCommand> GetAllOperations()
         {
             var allCommands = m_OperationStack.Concat(m_NetworkStack);
@@ -505,7 +505,7 @@ namespace TiltBrush
             }
             throw new InvalidOperationException();
         }
-
+#endif
         private static bool StrokeTimeLT(Stroke a, Stroke b)
         {
             return (a.HeadTimestampMs < b.HeadTimestampMs);
@@ -561,7 +561,7 @@ namespace TiltBrush
                 m_ScenePlayback.AddStroke(stroke);
             }
         }
-
+#if OPENBRUSH
         public void MemorizeBatchedBrushStroke(
             BatchSubset subset, Color rColor, Guid brushGuid,
             float fBrushSize, float brushScale,
