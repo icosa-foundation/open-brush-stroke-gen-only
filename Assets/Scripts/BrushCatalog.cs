@@ -198,11 +198,7 @@ namespace TiltBrush
                     m_GuiBrushList.Add(brush);
                 }
 #else
-                // TODO
-                if (Config.IsExperimental)
-                {
-                    m_GuiBrushList.Add(brush);
-                }
+                m_GuiBrushList.Add(brush);
 #endif
             }
             BrushCatalogChanged?.Invoke();

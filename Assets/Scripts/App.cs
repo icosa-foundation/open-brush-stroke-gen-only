@@ -88,8 +88,9 @@ namespace TiltBrush
         {
             m_Instance = this;
         }
+#if OPENBRUSH
         public static Config Config { get; }
-
+#endif
         private TiltBrushManifest MergeManifests()
         {
 #if ZAPBOX_SUPPORTED
