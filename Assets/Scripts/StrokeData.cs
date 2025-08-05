@@ -29,12 +29,9 @@ namespace TiltBrush
         // m_BrushSize * m_BrushScale = size in local/canvas space
         public float m_BrushScale;
         public PointerManager.ControlPoint[] m_ControlPoints;
-        public SketchMemoryScript.StrokeFlags m_Flags;
         // Seed for deterministic pseudo-random numbers for geometry generation.
         // Not currently serialized.
         public int m_Seed;
-        protected SketchGroupTag m_Group = SketchGroupTag.None;
-        public SketchGroupTag Group => m_Group;
         public Guid m_Guid;
 
 
@@ -47,9 +44,7 @@ namespace TiltBrush
                 this.m_BrushGuid = existing.m_BrushGuid;
                 this.m_BrushSize = existing.m_BrushSize;
                 this.m_BrushScale = existing.m_BrushScale;
-                this.m_Flags = existing.m_Flags;
                 this.m_Seed = existing.m_Seed;
-                this.m_Group = existing.m_Group;
                 this.m_ControlPoints = new PointerManager.ControlPoint[existing.m_ControlPoints.Length];
                 Array.Copy(existing.m_ControlPoints, this.m_ControlPoints, this.m_ControlPoints.Length);
             }

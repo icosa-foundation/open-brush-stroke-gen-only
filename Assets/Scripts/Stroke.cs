@@ -54,17 +54,6 @@ namespace TiltBrush
         /// Used for the saving thread to serialize the sketch.
         private StrokeData m_CopyForSaveThread;
 
-        /// The group this stroke is a part of. Cannot be null (as it is a struct).
-        public SketchGroupTag Group
-        {
-            get => m_Group;
-            set
-            {
-                var oldGroup = m_Group;
-                m_Group = value;
-            }
-        }
-
         /// Which control points on the stroke should be dropped due to simplification
         public bool[] m_ControlPointsToDrop;
 

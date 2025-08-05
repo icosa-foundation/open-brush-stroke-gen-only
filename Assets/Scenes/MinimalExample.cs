@@ -81,9 +81,6 @@ public class MinimalExample : MonoBehaviour
         };
         stroke.m_ControlPointsToDrop = Enumerable.Repeat(false, stroke.m_ControlPoints.Length).ToArray();
         stroke.Recreate(tr, canvas);
-
-        if (pathIndex != 0) stroke.m_Flags = SketchMemoryScript.StrokeFlags.IsGroupContinue;
-        SketchMemoryScript.m_Instance.MemoryListAdd(stroke);
     }
 
 }
