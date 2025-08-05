@@ -36,7 +36,7 @@ public class MinimalExample : MonoBehaviour
 
         int cpCount = path.Count - 1;
         if (smoothing > 0) cpCount *= 3; // Three control points per original vertex
-        var controlPoints = new List<PointerManager.ControlPoint>(cpCount);
+        var controlPoints = new List<ControlPoint>(cpCount);
 
         for (var vertexIndex = 0; vertexIndex < path.Count - 1; vertexIndex++)
         {
@@ -47,7 +47,7 @@ public class MinimalExample : MonoBehaviour
 
             void addPoint(Vector3 pos)
             {
-                controlPoints.Add(new PointerManager.ControlPoint
+                controlPoints.Add(new ControlPoint
                 {
                     m_Pos = pos,
                     m_Orient = orientation,

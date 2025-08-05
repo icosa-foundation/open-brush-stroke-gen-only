@@ -23,7 +23,7 @@ namespace TiltBrush
         // TODO: change to class?
         public struct Knot
         {
-            public PointerManager.ControlPoint point;
+            public ControlPoint point;
 
             /// Position, smoothed with a kernel of (.25, .5, .25)
             public Vector3 smoothedPos;
@@ -282,7 +282,7 @@ namespace TiltBrush
             Quaternion ori = localPointerXf.rotation;
             Knot knot = new Knot
             {
-                point = new PointerManager.ControlPoint
+                point = new ControlPoint
                 {
                     // TODO: better value for pressure?
                     m_Pos = pos,
@@ -328,7 +328,7 @@ namespace TiltBrush
             Quaternion ori = localPointerXf.rotation;
             Knot knot = new Knot
             {
-                point = new PointerManager.ControlPoint
+                point = new ControlPoint
                 {
                     m_Pos = pos,
                     m_Orient = ori,

@@ -412,9 +412,8 @@ namespace TiltBrush
             m_geometry.m_Tris.SetCount(0);
 
             // Straightedge is very WYSIWYG, so don't simplify if it's enabled.
-            bool simplify = !PointerManager.m_Instance.StraightEdgeModeEnabled &&
-                ((isEnd && m_SimplifyMode == SimplifyMode.SimplifyAtEnd) ||
-                (!isEnd && m_SimplifyMode == SimplifyMode.SimplifyInteractively && recordInterior));
+            bool simplify = (isEnd && m_SimplifyMode == SimplifyMode.SimplifyAtEnd) ||
+                (!isEnd && m_SimplifyMode == SimplifyMode.SimplifyInteractively && recordInterior);
 
             // Attempt to create hull. It can fail if the dimensionality is too low
             // because of too few points; and maybe also if the points are collinear/coplanar.

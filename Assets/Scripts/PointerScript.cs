@@ -24,60 +24,11 @@ namespace TiltBrush
 
     public class PointerScript : MonoBehaviour
     {
-        // ---- Private inspector data
-
-        [SerializeField] private Light m_PreviewLight;
-        [SerializeField] private float m_PreviewLightScalar = 1.0f;
-        [SerializeField] private Renderer m_Mesh;
-        //this is the list of meshes that make up the standard pointer look: cone + ring
-        [SerializeField] private Renderer[] m_PrimaryMeshes;
-        [SerializeField] private Transform m_BrushSizeIndicator;
-        [SerializeField] private Transform m_BrushPressureIndicator;
-        [SerializeField] private bool m_PreviewLineEnabled;
-        [SerializeField] private float m_PreviewLineControlPointLife = 1.0f;
-        [SerializeField] private float m_PreviewLineIdealLength = 1.0f;
-        [SerializeField] private AudioSource[] m_AudioSources;
-        [SerializeField] private Vector2 m_BrushAudioPitchVelocityRange;
-        [SerializeField] private AudioClip m_BrushPlaybackAudioClip;
-
-        // ---- Private member data
-
-        private bool m_AllowPreviewLight = true;
-
         private Color m_CurrentColor;
-        private float m_GlowPreviewEnabled = 1.0f;
-
-        private Vector3 m_InitialBrushSizeScale;
         private TiltBrush.BrushDescriptor m_CurrentBrush;
         private float m_CurrentBrushSize; // In pointer aka room space
         private Vector2 m_BrushSizeRange;
         private BaseBrushScript m_CurrentLine;
-        private float m_ParametricCreatorBackupStrokeSize; // In pointer aka room space
-
-        private float m_CurrentTotalVolume; // Brush audio volume before being divided between layers
-        private float m_BrushAudioMaxVolume;
-        private float m_BrushAudioAdjustSpeedUp;
-        private float m_BrushAudioAdjustSpeedDown;
-        private Vector2 m_BrushAudioVolumeVelocityRange;
-        private float m_BrushAudioBasePitch;
-        private float m_BrushAudioMaxPitchShift;
-
-        private bool m_AllowPreviewLine;
-        private float m_AllowPreviewLineTimer;
-        private BaseBrushScript m_PreviewLine;
-
-        private List<PointerManager.ControlPoint> m_ControlPoints;
-
-        private bool m_LastControlPointIsKeeper;
-        private Vector3 m_PreviousPosition; //used for audio
-
-        private float m_LineDepth;     // depth of stroke, only used in monoscopic mode. Room-space.
-        private float m_LineLength_CS; // distance moved for the active line. Canvas-space.
-        private float m_MovementSpeed;
-        private bool m_ShowDebugControlPoints = false;
-        private List<Vector3> m_DebugViewControlPoints;
-
-        private CanvasScript m_SubscribedCanvas;
 
         // ---- Public properties, accessors, events
 
@@ -122,23 +73,9 @@ namespace TiltBrush
 
         void Awake()
         {
-            m_ControlPoints = new List<PointerManager.ControlPoint>();
-
-            m_AllowPreviewLine = true;
-
-            if (m_PreviewLight)
-            {
-                m_PreviewLight.enabled = false;
-            }
-
-            if (m_BrushSizeIndicator)
-            {
-                m_InitialBrushSizeScale = m_BrushSizeIndicator.localScale;
-            }
             m_CurrentBrushSize = 1.0f;
             m_BrushSizeRange.x = 1.0f;
             m_BrushSizeRange.y = 2.0f;
-            m_DebugViewControlPoints = new List<Vector3>();
         }
 
         /// Bulk control point addition
@@ -154,11 +91,6 @@ namespace TiltBrush
         void _SetBrushSizeAbsolute(float value)
         {
             m_CurrentBrushSize = value;
-            if (m_BrushSizeIndicator)
-            {
-                Vector3 vLocalScale = m_InitialBrushSizeScale * m_CurrentBrushSize;
-                m_BrushSizeIndicator.localScale = vLocalScale;
-            }
         }
 
         /// Pass a Canvas parent, and a transform in that canvas's space.
@@ -170,12 +102,9 @@ namespace TiltBrush
             // Maybe change the brush to a proxy brush.
             BrushDescriptor desc = overrideDesc != null ? overrideDesc : m_CurrentBrush;
 
-            m_LineLength_CS = 0.0f;
-
-            float jitteredBrushSize = m_CurrentBrushSize;
             m_CurrentLine = BaseBrushScript.Create(
                 canvas.transform, xf_CS,
-                desc, m_CurrentColor, jitteredBrushSize);
+                desc, m_CurrentColor, m_CurrentBrushSize);
         }
 
         /// Like BeginLineFromMemory + EndLineFromMemory
@@ -225,11 +154,6 @@ namespace TiltBrush
                 return null;
             }
 
-            if (m_PreviewLight)
-            {
-                m_PreviewLight.enabled = false;
-            }
-
             var cp0 = stroke.m_ControlPoints[0];
             var xf_CS = TrTransform.TRS(cp0.m_Pos, cp0.m_Orient, stroke.m_BrushScale);
             var xf_RS = canvas.Pose * xf_CS;
@@ -247,18 +171,6 @@ namespace TiltBrush
             m_CurrentLine.RandomSeed = stroke.m_Seed;
 
             return m_CurrentLine.gameObject;
-        }
-
-        void OnDrawGizmos()
-        {
-            if (m_ShowDebugControlPoints)
-            {
-                Gizmos.color = Color.yellow;
-                for (int i = 0; i < m_DebugViewControlPoints.Count; ++i)
-                {
-                    Gizmos.DrawSphere(m_DebugViewControlPoints[i], 0.05f);
-                }
-            }
         }
     }
 } // namespace TiltBrush

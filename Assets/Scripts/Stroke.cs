@@ -40,15 +40,8 @@ namespace TiltBrush
         public Type m_Type = Type.NotCreated;
         /// Valid only when type == NotCreated. May be null.
         public CanvasScript m_IntendedCanvas;
-        /// Selected strokes need to remember which canvas they came from
-        public CanvasScript m_PreviousCanvas;
         /// Valid only when type == BrushStroke. Never null; will always have a BaseBrushScript.
         public GameObject m_Object;
-
-        /// used by SketchMemoryScript.m_Instance.m_MemoryList (ordered by time)
-        public LinkedListNode<Stroke> m_NodeByTime;
-        /// used by one of the lists in ScenePlayback (ordered by time)
-        public LinkedListNode<Stroke> m_PlaybackNode;
 
         /// A copy of the StrokeData part of the stroke.
         /// Used for the saving thread to serialize the sketch.
@@ -78,17 +71,9 @@ namespace TiltBrush
                 }
             }
         }
-        public uint HeadTimestampMs => this.m_ControlPoints[0].m_TimestampMs;
-
-        public uint TailTimestampMs => this.m_ControlPoints.Last().m_TimestampMs;
-
-
-        public float SizeInLocalSpace => m_BrushScale * m_BrushSize;
 
         public Stroke()
         {
-            m_NodeByTime = new LinkedListNode<Stroke>(this);
-            m_PlaybackNode = new LinkedListNode<Stroke>(this);
             m_Guid = Guid.NewGuid();
         }
 
@@ -108,48 +93,13 @@ namespace TiltBrush
             Array.Copy(existing.m_ControlPointsToDrop, m_ControlPointsToDrop,
                 existing.m_ControlPointsToDrop.Length);
 
-            // Alas, we can't chain constructor to this() because we chain to base(existing).
-            // And we can't use field initializers for the linked list creation.
-            m_NodeByTime = new LinkedListNode<Stroke>(this);
-            m_PlaybackNode = new LinkedListNode<Stroke>(this);
-
             if (existing.m_Guid != null)
                 m_Guid = Guid.NewGuid();
-        }
-
-        /// Makes a copy of stroke, if one has not already been made.
-        /// Should only be called by the 'ThreadedSave' method of SaveLoadScript
-        public StrokeData GetCopyForSaveThread()
-        {
-            if (m_CopyForSaveThread == null)
-            {
-                m_CopyForSaveThread = new StrokeData(this);
-            }
-            return m_CopyForSaveThread;
         }
 
         public void InvalidateCopy()
         {
             m_CopyForSaveThread = null;
-        }
-
-        /// Releases all resources owned by the stroke; consider the stroke unusable after this.
-        ///
-        /// It is important that this be called before trying to drop a Stroke
-        /// into the garbage. Not doing so causes memory leaks:
-        /// - Batch <-> BatchSubset link won't get torn down
-        /// - BatchSubset <-> Stroke link won't get torn down
-        /// - Batch will never become empty, and never get deallocated
-        /// - Stroke will never become garbage because of the Batch -> Subset -> Stroke link
-        public void DestroyStroke()
-        {
-            Uncreate();
-            // The object is still in a valid state; we should probably purposely vandalize it,
-            // but some code might still erroneously use Destroy() when they mean Uncreate()
-            // TODO: Find and fix those places
-            //   m_Type = StrokeType.Destroyed;
-            //   m_ControlPoints = null;
-            //   m_CopyForSaveThread = null;
         }
 
         /// Sets type to NotCreated, releasing render resources if applicable.
@@ -197,7 +147,7 @@ namespace TiltBrush
                 // PointerManager's pointer management is a complete mess.
                 // "5" is the most-likely to be unused. It's terrible that this
                 // needs to go through a pointer.
-                var pointer = PointerManager.m_Instance.GetTransientPointer(5);
+                var pointer = App.Instance.m_PointerForNonOpenBrush;
                 pointer.RecreateLineFromMemory(this);
             }
             else if (canvas != null)
@@ -214,7 +164,6 @@ namespace TiltBrush
                 throw new InvalidOperationException("Nothing to do");
             }
         }
-
 
         // TODO: Possibly could optimize this in C++ for 11.5% of time in selection.
         private void LeftTransformControlPoints(TrTransform leftTransform, bool absoluteScale = false)
@@ -321,7 +270,7 @@ namespace TiltBrush
                     // PointerManager's pointer management is a complete mess.
                     // "5" is the most-likely to be unused. It's terrible that this
                     // needs to go through a pointer.
-                    var pointer = PointerManager.m_Instance.GetTransientPointer(5);
+                    var pointer = App.Instance.m_PointerForNonOpenBrush;
                     pointer.RecreateLineFromMemory(this);
                 }
             }
