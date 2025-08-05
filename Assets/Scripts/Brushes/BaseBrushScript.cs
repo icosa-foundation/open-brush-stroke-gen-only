@@ -345,9 +345,9 @@ namespace TiltBrush
         }
 
         public abstract void FinalizeSolitaryBrush();
-
+#if OPENBRUSH
         public abstract BatchSubset FinalizeBatchedBrush();
-
+#endif
         #endregion
 
         #region Helpers for subclasses

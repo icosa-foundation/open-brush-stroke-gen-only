@@ -968,7 +968,7 @@ namespace TiltBrush
             m_CurrentLine.ApplyChangesToVisuals();
 
             // Copy in new contents
-
+#if OPENBRUSH
             if (App.Config.m_UseBatchedBrushes && m_CurrentLine.m_bCanBatch)
             {
                 var subset = m_CurrentLine.FinalizeBatchedBrush();
@@ -983,12 +983,15 @@ namespace TiltBrush
                 Destroy(m_CurrentLine.gameObject);
             }
             else
+#endif
             {
                 m_CurrentLine.FinalizeSolitaryBrush();
 
                 stroke.m_Type = Stroke.Type.BrushStroke;
                 stroke.m_IntendedCanvas = null;
+#if OPENBRUSH
                 Debug.Assert(stroke.m_BatchSubset == null);
+#endif
                 stroke.m_Object = m_CurrentLine.gameObject;
                 stroke.m_Object.GetComponent<BaseBrushScript>().Stroke = stroke;
             }

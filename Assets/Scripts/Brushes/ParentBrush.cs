@@ -490,11 +490,11 @@ namespace TiltBrush
                 child.m_brush.FinalizeSolitaryBrush();
             }
         }
-
+#if OPENBRUSH
         public override BatchSubset FinalizeBatchedBrush()
         {
             throw new NotImplementedException();
         }
+#endif
     }
-
 } // namespace TiltBrush

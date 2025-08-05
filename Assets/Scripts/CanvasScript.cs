@@ -52,16 +52,15 @@ namespace TiltBrush
         private bool m_bInitialized;
         private Transform m_CanvasTransformPrefab;
         private CanvasTransformGizmo m_CanvasTransformGizmo;
-#endif
+
         private BatchManager m_BatchManager;
-#if OPENBRUSH
+
         public event PoseChangedEventHandler PoseChanged;
-#endif
         public BatchManager BatchManager
         {
             get { return m_BatchManager; }
         }
-#if OPENBRUSH
+
         /// Helper for getting and setting transforms on Transform components.
         /// Transform natively allows you to access parent-relative ("local")
         /// and root-relative ("global") views of position, rotation, and scale.

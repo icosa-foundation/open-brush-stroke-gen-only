@@ -44,9 +44,10 @@ namespace TiltBrush
         public CanvasScript m_PreviousCanvas;
         /// Valid only when type == BrushStroke. Never null; will always have a BaseBrushScript.
         public GameObject m_Object;
+#if OPENBRUSH
         /// Valid only when type == BatchedBrushStroke.
         public BatchSubset m_BatchSubset;
-
+#endif
         /// used by SketchMemoryScript.m_Instance.m_MemoryList (ordered by time)
         public LinkedListNode<Stroke> m_NodeByTime;
         /// used by one of the lists in ScenePlayback (ordered by time)
@@ -83,10 +84,12 @@ namespace TiltBrush
                 {
                     return m_IntendedCanvas;
                 }
+#if OPENBRUSH
                 else if (m_Type == Type.BatchedBrushStroke)
                 {
                     return m_BatchSubset.Canvas;
                 }
+#endif
                 else if (m_Type == Type.BrushStroke)
                 {
                     // Null checking is needed because sketches that fail to load
@@ -107,9 +110,13 @@ namespace TiltBrush
         {
             get
             {
+#if OPENBRUSH
                 return this.m_Object != null && this.m_Object.activeSelf ||
                     m_Type == Type.BatchedBrushStroke &&
                     m_BatchSubset.m_Active;
+#else
+                return m_Object != null && m_Object.activeSelf;
+#endif
             }
         }
 
@@ -149,6 +156,7 @@ namespace TiltBrush
         {
             get
             {
+#if OPENBRUSH
                 if (m_Object != null)
                 {
                     return m_Object.transform;
@@ -157,6 +165,9 @@ namespace TiltBrush
                 {
                     return m_BatchSubset.m_ParentBatch.transform;
                 }
+#else
+                return m_Object.transform;
+#endif
             }
         }
 
@@ -239,7 +250,7 @@ namespace TiltBrush
                 Object.Destroy(m_Object);
                 m_Object = null;
             }
-
+#if OPENBRUSH
             // TODO: instead of destroying, reuse the previous batch space if possible
             // (but be careful because the brush may have changed). Excessive use of Recreate()
             // will swiss-cheese our batches.
@@ -253,19 +264,19 @@ namespace TiltBrush
                 m_BatchSubset.m_Stroke = null;
                 m_BatchSubset = null;
             }
-
+#endif
             m_Type = Type.NotCreated;
         }
 
         /// Like Recreate except the translation are interpreted as a destination point relative to the canvas
         /// (instead of how much to translate by). Rotation and scale are relative and applied after the translation.
-
+#if OPENBRUSH
         public void RecreateAt(TrTransform xf_CS)
         {
             TrTransform leftTransform = TrTransform.InvMul(TrTransform.T(m_BatchSubset.m_Bounds.center), xf_CS);
             Recreate(leftTransform);
         }
-
+#endif
         /// Ensure there is geometry for this stroke, creating if necessary.
         /// Optionally also calls SetParent() or LeftTransformControlPoints() before creation.
         ///
@@ -314,6 +325,7 @@ namespace TiltBrush
             }
         }
 
+#if OPENBRUSH
         /// Similar to Recreate() but takes a fast path by copying geometry from another
         /// stroke, if possible.
         /// This only makes sense if the stroke has no geometry, so it's an error otherwise.
@@ -334,7 +346,7 @@ namespace TiltBrush
             m_IntendedCanvas = null;
             m_Type = Type.BatchedBrushStroke;
         }
-
+#endif
         // TODO: Possibly could optimize this in C++ for 11.5% of time in selection.
         private void LeftTransformControlPoints(TrTransform leftTransform, bool absoluteScale = false)
         {
@@ -384,6 +396,7 @@ namespace TiltBrush
 
             switch (m_Type)
             {
+#if OPENBRUSH
                 case Type.BatchedBrushStroke:
                     {
                         // Shortcut: move geometry to new BatchManager rather than recreating from scratch
@@ -393,6 +406,7 @@ namespace TiltBrush
                         m_BatchSubset.m_Stroke = this;
                         break;
                     }
+#endif
                 case Type.BrushStroke:
                     {
                         m_Object.transform.SetParent(canvas.transform, false);
@@ -452,6 +466,7 @@ namespace TiltBrush
                     var pointer = PointerManager.m_Instance.GetTransientPointer(5);
                     pointer.RecreateLineFromMemory(this);
                 }
+#if OPENBRUSH
                 else
                 {
                     Debug.Assert(m_Type == Type.BatchedBrushStroke);
@@ -464,6 +479,7 @@ namespace TiltBrush
                     m_BatchSubset.m_Stroke = this;
                     LeftTransformControlPoints(leftTransform.Value);
                 }
+#endif
             }
         }
 
@@ -479,6 +495,7 @@ namespace TiltBrush
                         rBrushScript.HideBrush(hide);
                     }
                     break;
+#if OPENBRUSH
                 case Type.BatchedBrushStroke:
                     var batch = m_BatchSubset.m_ParentBatch;
                     if (hide)
@@ -490,6 +507,7 @@ namespace TiltBrush
                         batch.EnableSubset(m_BatchSubset);
                     }
                     break;
+#endif
                 case Type.NotCreated:
                     Debug.LogError("Unexpected: NotCreated stroke");
                     break;
@@ -508,7 +526,7 @@ namespace TiltBrush
             }
 #endif
         }
-
+#if OPENBRUSH
         public void SetShaderClipping(float clipStart, float clipEnd)
         {
             _CheckValidLayerState();
@@ -524,7 +542,7 @@ namespace TiltBrush
             batch.InstantiatedMaterial.SetFloat("_ClipStart", startIndex);
             batch.InstantiatedMaterial.SetFloat("_ClipEnd", endIndex);
         }
-#if OPENBRUSH
+
         public void SetShaderFloat(string parameter, float value)
         {
             _CheckValidLayerState();
@@ -552,7 +570,7 @@ namespace TiltBrush
             }
             batch.InstantiatedMaterial.SetColor(parameter, color._Color);
         }
-#endif
+
         public void SetShaderTexture(string parameter, Texture2D image)
         {
             _CheckValidLayerState();
@@ -576,8 +594,9 @@ namespace TiltBrush
             }
             batch.InstantiatedMaterial.SetVector(parameter, new Vector4(x, y, z, w));
         }
+#endif
     }
-
+    
     public class StrokeShaderModifierException : NotSupportedException
     {
         public StrokeShaderModifierException(string s) : base(s) { }

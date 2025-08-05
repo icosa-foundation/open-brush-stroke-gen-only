@@ -389,17 +389,13 @@ namespace TiltBrush
 
             mesh.RecalculateBounds();
         }
-
+#if OPENBRUSH
         override public BatchSubset FinalizeBatchedBrush()
         {
-#if OPENBRUSH
             var mgr = this.Canvas.BatchManager;
             return mgr.CreateSubset(m_Desc, m_geometry);
-#else
-            return null;
-#endif
         }
-
+#endif
         /// Don't necessarily have to use the master's information to update the mesh.
         override public void ApplyChangesToVisuals()
         {

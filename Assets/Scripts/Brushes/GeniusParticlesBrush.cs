@@ -265,13 +265,13 @@ namespace TiltBrush
         {
             return true;
         }
-
+#if OPENBRUSH
         public override BatchSubset FinalizeBatchedBrush()
         {
             FinalizeParticleMesh();
             return base.FinalizeBatchedBrush();
         }
-
+#endif
         public override void FinalizeSolitaryBrush()
         {
             FinalizeParticleMesh();

@@ -244,7 +244,7 @@ namespace TiltBrush
             mf.mesh.RecalculateBounds();
             MasterBrush.Pool.PutAndClear(ref m_Geometry);
         }
-
+#if OPENBRUSH
         override public BatchSubset FinalizeBatchedBrush()
         {
             int numVerts = GetNumUsedVerts();
@@ -280,7 +280,7 @@ namespace TiltBrush
             return Canvas.BatchManager.CreateSubset(
                 m_Desc, numVerts, numTris, geometry);
         }
-
+#endif
         /// Rewrite vertices and indices, welding together identical verts.
         /// Input topology must be as documented at the top of QuadStripBrush.cs
         /// Output topology is the same as FlatGeometryBrush

@@ -160,13 +160,13 @@ namespace TiltBrush
             TrimShortStrokeAfterBreak();
             base.FinalizeSolitaryBrush();
         }
-
+#if OPENBRUSH
         override public BatchSubset FinalizeBatchedBrush()
         {
             TrimShortStrokeAfterBreak();
             return base.FinalizeBatchedBrush();
         }
-
+#endif
         // Fills in any knot data needed for geometry generation.
         // - fill in length, nRight, nSurface, iVert, iTri
         // - calculate strip-break points

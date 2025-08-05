@@ -243,13 +243,13 @@ namespace TiltBrush
             // This actually modifies the UVs
             UpdateUVsForSegment(m_InitialQuadIndex, iQuad1, size);
         }
-
+#if OPENBRUSH
         public override BatchSubset FinalizeBatchedBrush()
         {
             FlushUpdateUVRequest();
             return base.FinalizeBatchedBrush();
         }
-
+#endif
         public override void FinalizeSolitaryBrush()
         {
             FlushUpdateUVRequest();

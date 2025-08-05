@@ -994,10 +994,12 @@ namespace TiltBrush
                 Debug.LogWarning($"Stroke of type {BrushCatalog.m_Instance.GetBrush(stroke.m_BrushGuid)} has no mesh");
                 return 0;
             }
+#if OPENBRUSH
             else if (stroke.m_Type == Stroke.Type.BatchedBrushStroke)
             {
                 return stroke.m_BatchSubset.m_VertLength;
             }
+#endif
             else
             {
                 throw new InvalidOperationException();
@@ -1175,7 +1177,7 @@ namespace TiltBrush
 
             VerifySizes();
         }
-
+#if OPENBRUSH
         /// Append all geometry from the subset to this pool.
         /// Vertex layouts must be identical
         public void Append(BatchSubset subset)
@@ -1185,7 +1187,7 @@ namespace TiltBrush
                 subset.m_StartVertIndex, subset.m_VertLength,
                 subset.m_iTriIndex, subset.m_nTriIndex);
         }
-
+#endif
         /// Does not copy vertex format -- caller can do that, if desired
         /// Bad things will happen if the rhs does not have all the vertex
         /// data needed by lhs.

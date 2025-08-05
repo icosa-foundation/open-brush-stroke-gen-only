@@ -175,7 +175,7 @@ namespace TiltBrush
             base.ResetBrushForPreview(localPointerXf);
             CreateVerticesFromKnots(0);
         }
-
+#if OPENBRUSH
         public override BatchSubset FinalizeBatchedBrush()
         {
             if (m_SimplifyMode == SimplifyMode.SimplifyAtEnd)
@@ -184,7 +184,7 @@ namespace TiltBrush
             }
             return base.FinalizeBatchedBrush();
         }
-
+#endif
         void ResizeVertices(int desired)
         {
             // Be less garbagey: re-use the Vertex instances when possible.

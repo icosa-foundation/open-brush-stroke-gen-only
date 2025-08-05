@@ -47,10 +47,12 @@ namespace TiltBrush
         {
             return true;
         }
+#if OPENBRUSH
         override public BatchSubset FinalizeBatchedBrush()
         {
             return null;
         }
+#endif
         override public int GetNumUsedVerts() { return 0; }
         override public float GetSpawnInterval(float pressure01) { return 0f; }
         override protected void InitUndoClone(GameObject clone) { }
