@@ -7,6 +7,7 @@ public class MinimalExample : MonoBehaviour
 {
     void Start()
     {
+        BrushCatalog.m_Instance.Init();
         var path = new List<TrTransform>
         {
              TrTransform.TRS(new Vector3(0, 0, 0), Quaternion.identity, 1),
@@ -16,7 +17,7 @@ public class MinimalExample : MonoBehaviour
         var color = Color.blue;
         var brush = BrushCatalog.m_Instance.DefaultBrush;
         float smoothing = 0;
-        var canvas = new CanvasScript();
+        var canvas = App.ActiveCanvas;
         float brushScale = 1f;
         float brushSize = 1f;
         int seed = 0;
