@@ -34,7 +34,6 @@ namespace TiltBrush
         public Texture2D m_GlobalNoiseTexture;
 
         [SerializeField] private Brush m_DefaultBrush;
-        [SerializeField] private Brush m_ZapboxDefaultBrush;
         private bool m_IsLoading;
         private Dictionary<Guid, Brush> m_GuidToBrush;
         private List<Brush> m_GuiBrushList;
@@ -54,13 +53,7 @@ namespace TiltBrush
             }
         }
 
-        public Brush DefaultBrush
-        {
-            get
-            {
-                return m_DefaultBrush;
-            }
-        }
+        public Brush DefaultBrush => m_DefaultBrush;
 
         void Awake()
         {
@@ -81,12 +74,7 @@ namespace TiltBrush
                     m_BlocksMaterials[i].brushDescriptor);
             }
             Shader.SetGlobalTexture("_GlobalNoiseTexture", m_GlobalNoiseTexture);
-        }
 
-        /// Begins reloading any brush assets that come from loose files.
-        /// The "BrushCatalogChanged" event will be fired when this is complete.
-        public void BeginReload()
-        {
             m_IsLoading = true;
 
             var manifestBrushes = LoadBrushesInManifest();

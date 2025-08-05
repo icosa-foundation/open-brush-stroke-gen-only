@@ -89,10 +89,10 @@ namespace TiltBrush
 
             /// true iff there is geometry that ends at point.m_Pos.
             /// Used to detect the start/end of segments in a stroke.
-            public bool HasGeometry { get { return nVert > 0; } }
+            public bool HasGeometry => nVert > 0;
 
             /// Because qFrame is only valid if HasGeometry
-            public Quaternion? Frame { get { return HasGeometry ? (Quaternion?)qFrame : null; } }
+            public Quaternion? Frame => HasGeometry ? (Quaternion?)qFrame : null;
         }
 
         // Distance for pressure to lerp to ~90% of its instantaneous value. Value in meters.
@@ -127,21 +127,9 @@ namespace TiltBrush
         /// or null if geometry is fully up-to-date.
         protected int? m_FirstChangedControlPoint;
 
-        public int NumVerts
-        {
-            get
-            {
-                return (m_geometry != null) ? m_geometry.m_Vertices.Count : m_CachedNumVerts;
-            }
-        }
+        public int NumVerts => (m_geometry != null) ? m_geometry.m_Vertices.Count : m_CachedNumVerts;
 
-        public int NumTris
-        {
-            get
-            {
-                return (m_geometry != null) ? m_geometry.m_Tris.Count : m_CachedNumTris;
-            }
-        }
+        public int NumTris => (m_geometry != null) ? m_geometry.m_Tris.Count : m_CachedNumTris;
 
         /// bDoubleSided
         ///    If set, the Set{Tri,Vert,UV,Tangent} APIs will automatically

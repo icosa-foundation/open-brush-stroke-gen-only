@@ -89,24 +89,12 @@ namespace TiltBrush
                 }
             }
         }
-        public uint HeadTimestampMs
-        {
-            get { return this.m_ControlPoints[0].m_TimestampMs; }
-        }
+        public uint HeadTimestampMs => this.m_ControlPoints[0].m_TimestampMs;
 
-        public uint TailTimestampMs
-        {
-            get { return this.m_ControlPoints.Last().m_TimestampMs; }
-        }
+        public uint TailTimestampMs => this.m_ControlPoints.Last().m_TimestampMs;
 
 
-        public float SizeInLocalSpace
-        {
-            get
-            {
-                return m_BrushScale * m_BrushSize;
-            }
-        }
+        public float SizeInLocalSpace => m_BrushScale * m_BrushSize;
 
         public Stroke()
         {

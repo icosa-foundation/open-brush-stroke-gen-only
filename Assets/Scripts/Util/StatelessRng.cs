@@ -119,7 +119,7 @@ namespace TiltBrush
 
         private readonly int m_seed;
 
-        public int Seed { get { return m_seed; } }
+        public int Seed => m_seed;
 
         public StatelessRng(int seed)
         {

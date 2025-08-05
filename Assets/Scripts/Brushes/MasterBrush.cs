@@ -34,10 +34,7 @@ namespace TiltBrush
         public const int kActiveStrokeQuads = 1000;
 
         private static Pool<MasterBrush> sm_pool = new Pool<MasterBrush>();
-        public static Pool<MasterBrush> Pool
-        {
-            get { return sm_pool; }
-        }
+        public static Pool<MasterBrush> Pool => sm_pool;
 
         // Instance
 
@@ -57,10 +54,7 @@ namespace TiltBrush
         /// If you need more, use GeometryBrush instead.
         public VertexLayout? VertexLayout
         {
-            get
-            {
-                return m_VertexLayout;
-            }
+            get => m_VertexLayout;
             set
             {
                 if (value != null)
@@ -85,10 +79,7 @@ namespace TiltBrush
             }
         }
 
-        public int NumVerts
-        {
-            get { return m_NumVerts; }
-        }
+        public int NumVerts => m_NumVerts;
 
         public MasterBrush()
         {

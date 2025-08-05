@@ -80,10 +80,7 @@ namespace TiltBrush
         protected bool m_AllowStripBreak = true;
         protected int? m_LeadingSegmentInitialQuadIndex;
 
-        protected int Stride
-        {
-            get { return 6 * (m_EnableBackfaces ? 2 : 1); }
-        }
+        protected int Stride => 6 * (m_EnableBackfaces ? 2 : 1);
 
         public QuadStripBrush()
             : base(bCanBatch: true)

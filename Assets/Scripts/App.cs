@@ -24,10 +24,7 @@ namespace TiltBrush
         public CanvasScript m_Canvas;
         public static CanvasScript ActiveCanvas => Instance.m_Canvas;
         public PointerScript m_PointerForNonOpenBrush;
-        public static App Instance
-        {
-            get { return m_Instance; }
-        }
+        public static App Instance => m_Instance;
         [SerializeField] private TiltBrushManifest m_ManifestStandard;
         [SerializeField] private TiltBrushManifest m_ManifestExperimental;
         private TiltBrushManifest m_ManifestFull;
@@ -45,8 +42,7 @@ namespace TiltBrush
         }
         /// Time origin of sketch in seconds for case when drawing is not sync'd to media.
         private double m_sketchTimeBase = 0;
-        public double CurrentSketchTime
-        {
+        public double CurrentSketchTime =>
             // Unity's Time.time has useful precision probably <= 1ms, and unknown
             // drift/accuracy. It is a single (but is a double, internally), so its
             // raw precision drops to ~2ms after ~4 hours and so on.
@@ -61,12 +57,8 @@ namespace TiltBrush
             //
             // For realtime sync, Time.time is probably the best thing to use.
             // For postproduction sync, probably C# DateTime.
-            get
-            {
-                // If you change this, also modify SketchTimeToLevelLoadTime
-                return Time.timeSinceLevelLoad - m_sketchTimeBase;
-            }
-        }
+            // If you change this, also modify SketchTimeToLevelLoadTime
+            Time.timeSinceLevelLoad - m_sketchTimeBase;
 
         void Awake()
         {

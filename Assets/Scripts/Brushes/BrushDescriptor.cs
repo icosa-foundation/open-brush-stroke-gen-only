@@ -141,13 +141,7 @@ namespace TiltBrush
         public float m_BoundsPadding; // amount to pad bounding box by in canvas space in meters
 
         /// Return non-instantiated material
-        public Material Material
-        {
-            get
-            {
-                return m_Material;
-            }
-        }
+        public Material Material => m_Material;
 
         public override string ToString()
         {

@@ -218,29 +218,11 @@ namespace TiltBrush
             }
         }
 
-        public Vector3 forward
-        {
-            get
-            {
-                return this.rotation * Vector3.forward;
-            }
-        }
+        public Vector3 forward => this.rotation * Vector3.forward;
 
-        public Vector3 up
-        {
-            get
-            {
-                return this.rotation * Vector3.up;
-            }
-        }
+        public Vector3 up => this.rotation * Vector3.up;
 
-        public Vector3 right
-        {
-            get
-            {
-                return this.rotation * Vector3.right;
-            }
-        }
+        public Vector3 right => this.rotation * Vector3.right;
 
         public bool IsFinite()
         {

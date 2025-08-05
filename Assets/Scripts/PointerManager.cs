@@ -46,8 +46,8 @@ namespace TiltBrush
 
         public bool StraightEdgeModeEnabled
         {
-            get { return m_StraightEdgeEnabled; }
-            set { m_StraightEdgeEnabled = value; }
+            get => m_StraightEdgeEnabled;
+            set => m_StraightEdgeEnabled = value;
         }
         // Return a pointer suitable for transient use (like for playback)
         // Guaranteed to be different from any non-null return value of GetPointer(ControllerName)
@@ -59,11 +59,6 @@ namespace TiltBrush
         void Awake()
         {
             m_Instance = this;
-        }
-
-        public bool IsMainPointerProcessingLine()
-        {
-            return false;
         }
     }
 } // namespace TiltBrush

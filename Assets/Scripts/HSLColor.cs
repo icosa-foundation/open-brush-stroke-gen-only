@@ -31,7 +31,7 @@ namespace TiltBrush
 
         public float HueDegrees
         {
-            get { return h * (360f / HUE_MAX); }
+            get => h * (360f / HUE_MAX);
             set
             {
                 // Order of operations is important here to avoid a ULP error
@@ -43,7 +43,7 @@ namespace TiltBrush
 
         public float Hue01
         {
-            get { return h * (1f / HUE_MAX); }
+            get => h * (1f / HUE_MAX);
             set
             {
                 value = (value * HUE_MAX) % HUE_MAX;

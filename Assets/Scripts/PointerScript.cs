@@ -114,8 +114,8 @@ namespace TiltBrush
         /// On set, values outside the brush's nominal range are clamped.
         public float BrushSizeAbsolute
         {
-            get { return m_CurrentBrushSize; }
-            set { _SetBrushSizeAbsolute(Mathf.Clamp(value, m_BrushSizeRange.x, m_BrushSizeRange.y)); }
+            get => m_CurrentBrushSize;
+            set => _SetBrushSizeAbsolute(Mathf.Clamp(value, m_BrushSizeRange.x, m_BrushSizeRange.y));
         }
 
         // ---- Unity events

@@ -64,8 +64,8 @@ namespace TiltBrush
         {
             public TrTransform this[Transform t]
             {
-                get { return TrTransform.FromLocalTransform(t); }
-                set { value.ToLocalTransform(t); }
+                get => TrTransform.FromLocalTransform(t);
+                set => value.ToLocalTransform(t);
             }
         }
 
@@ -81,10 +81,7 @@ namespace TiltBrush
         ///
         public struct GlobalAccessor
         {
-            public TrTransform this[Transform t]
-            {
-                get { return TrTransform.FromTransform(t); }
-            }
+            public TrTransform this[Transform t] => TrTransform.FromTransform(t);
         }
 
         /// A helper object that allows trasforms to be get/set using

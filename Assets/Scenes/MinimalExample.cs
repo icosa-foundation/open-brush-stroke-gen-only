@@ -8,7 +8,6 @@ public class MinimalExample : MonoBehaviour
     void Start()
     {
         BrushCatalog.m_Instance.Init();
-        BrushCatalog.m_Instance.BeginReload();
 
         var path = new List<TrTransform>();
 
@@ -81,14 +80,10 @@ public class MinimalExample : MonoBehaviour
             m_ControlPoints = controlPoints.ToArray(),
         };
         stroke.m_ControlPointsToDrop = Enumerable.Repeat(false, stroke.m_ControlPoints.Length).ToArray();
-        stroke.Group = new SketchGroupTag(group);
         stroke.Recreate(tr, canvas);
+
         if (pathIndex != 0) stroke.m_Flags = SketchMemoryScript.StrokeFlags.IsGroupContinue;
         SketchMemoryScript.m_Instance.MemoryListAdd(stroke);
-
-        // GameObject gameObj = new GameObject("BrushObject");
-        // BaseBrushScript brushScript = gameObj.AddComponent<BaseBrushScript>();
-        // brushScript.HideBrush(false);
     }
 
 }

@@ -24,7 +24,8 @@ namespace TiltBrush
         {
             public int back, front;
 
-            public bool IsValid { get { return back != -1; } }
+            public bool IsValid => back != -1;
+
             public void Clear()
             {
                 back = -1;

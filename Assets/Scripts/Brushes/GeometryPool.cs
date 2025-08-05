@@ -348,10 +348,7 @@ namespace TiltBrush
 
         /// Returns true if the Pool's geometry buffers are usable.
         /// See also EnsureGeometryResident().
-        public bool IsGeometryResident
-        {
-            get { return m_IsResident; }
-        }
+        public bool IsGeometryResident => m_IsResident;
 
         /// All writes must go through the setter.
         ///
@@ -361,7 +358,7 @@ namespace TiltBrush
         /// copied (eg, from m_Texcoord0.v2 to m_Texcoord0.v3).
         public VertexLayout Layout
         {
-            get { return m_Layout; }
+            get => m_Layout;
             set
             {
                 m_Layout = value;

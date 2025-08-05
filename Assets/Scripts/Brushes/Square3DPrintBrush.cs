@@ -49,7 +49,8 @@ namespace TiltBrush
         /// Controls smoothness; must be in [1, kMaxBevelVerts]
         [Range(1, kMaxBevelVerts)]
         private int m_bevelVerts = 2;
-        private int m_vertsPerRing { get { return 4 * m_bevelVerts; } }
+        private int m_vertsPerRing => 4 * m_bevelVerts;
+
         /// Interpolation parameter between large and small ring distances in [0,1].
         /// Higher m_tessellation means denser geometry and vice versa.
         private float m_tessellation = 1f;

@@ -106,10 +106,7 @@ namespace TiltBrush
             /// Assigning to BackingArray resets Count to Capacity.
             public T[] BackingArray
             {
-                get
-                {
-                    return _items;
-                }
+                get => _items;
                 set
                 {
                     if (value == null)
@@ -122,12 +119,12 @@ namespace TiltBrush
             }
 
             /// Unlike List<T>, Capacity is not writable. Mutate the original list instead.
-            public int Capacity { get { return _items.Length; } }
+            public int Capacity => _items.Length;
 
             /// Unlike List<T>, Count is writable.
             public int Count
             {
-                get { return _size; }
+                get => _size;
                 set
                 {
                     if (value > Capacity)

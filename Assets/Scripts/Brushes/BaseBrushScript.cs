@@ -97,7 +97,7 @@ namespace TiltBrush
         protected bool m_IsLoading = false;
         protected Color32 m_Color;
         protected TrTransform m_LastSpawnXf;
-        protected Vector3 m_LastSpawnPos { get { return m_LastSpawnXf.translation; } }
+        protected Vector3 m_LastSpawnPos => m_LastSpawnXf.translation;
         protected float m_BaseSize_PS;
         protected StatelessRng m_rng;
 
@@ -111,62 +111,39 @@ namespace TiltBrush
         /// The size of the pointer when it created the stroke.
         /// Larger pointers create larger lines with a lower density of control points.
         /// This can also be thought of as the "Pointer to Local" scale factor
-        public float StrokeScale
-        {
-            get { return m_LastSpawnXf.scale; }
-        }
+        public float StrokeScale => m_LastSpawnXf.scale;
 
         /// Convert a distance/velocity from local to pointer coordinates
-        public float LOCAL_TO_POINTER
-        {
-            get { return 1f / m_LastSpawnXf.scale; }
-        }
+        public float LOCAL_TO_POINTER => 1f / m_LastSpawnXf.scale;
 
         /// Convert a distance/velocity from pointer to local coordinates (ie Room to Canvas).
-        public float POINTER_TO_LOCAL
-        {
-            get { return m_LastSpawnXf.scale; }
-        }
+        public float POINTER_TO_LOCAL => m_LastSpawnXf.scale;
 
         /// The size of the brush, in the pointer (ie Room) coordinate system.
         public float BaseSize_PS
         {
-            get { return m_BaseSize_PS; }
-            set { m_BaseSize_PS = value; }
+            get => m_BaseSize_PS;
+            set => m_BaseSize_PS = value;
         }
 
         /// The size of the brush, in the parent-local (Canvas) coordinate system
-        public float BaseSize_LS
-        {
-            get { return m_BaseSize_PS * POINTER_TO_LOCAL; }
-        }
+        public float BaseSize_LS => m_BaseSize_PS * POINTER_TO_LOCAL;
 
         /// Canvas that this stroke is a part of.
-        public CanvasScript Canvas
-        {
-            get
-            {
-                // Currently, all strokes are created directly under a Canvas node.
-                // If that changes, we'll have to find a different way of inferring Canvas.
-                return transform.parent.GetComponent<CanvasScript>();
-            }
-        }
+        public CanvasScript Canvas =>
+            // Currently, all strokes are created directly under a Canvas node.
+            // If that changes, we'll have to find a different way of inferring Canvas.
+            transform.parent.GetComponent<CanvasScript>();
 
-        public BrushDescriptor Descriptor
-        {
-            get { return m_Desc; }
-        }
+        public BrushDescriptor Descriptor => m_Desc;
 
-        public Color CurrentColor
-        {
-            get { return m_Color; }
-        }
+        public Color CurrentColor => m_Color;
 
         /// The setter should only be used during initialization.
         public int RandomSeed
         {
-            get { return m_rng.Seed; }
-            set { m_rng = new StatelessRng(value); }
+            get => m_rng.Seed;
+            set => m_rng = new StatelessRng(value);
         }
 
         public Stroke Stroke { get; set; }
