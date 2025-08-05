@@ -10,15 +10,18 @@ public class MinimalExample : MonoBehaviour
         BrushCatalog.m_Instance.Init();
         BrushCatalog.m_Instance.BeginReload();
 
-        var path = new List<TrTransform>
-        {
-             TrTransform.TRS(new Vector3(0, 0, 0), Quaternion.identity, 1),
-             TrTransform.TRS(new Vector3(1, 1, 1), Quaternion.identity, 1),
-             TrTransform.TRS(new Vector3(2, 2, 2), Quaternion.identity, 1),
-             TrTransform.TRS(new Vector3(3, 1, 0), Quaternion.identity, 1),
-             TrTransform.TRS(new Vector3(4, 0, -1), Quaternion.identity, 1),
+        var path = new List<TrTransform>();
 
-        };
+        int segments = 32;
+        float radius = 1.5f;
+        for (int i = 0; i < segments; i++)
+        {
+            float angle = i * 2 * Mathf.PI / segments;
+            Vector3 position = new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0);
+            Quaternion rotation = Quaternion.LookRotation(Vector3.forward, position);
+            path.Add(TrTransform.TRS(position, rotation, 1));
+        }
+
         var color = Color.blue;
         var brush = BrushCatalog.m_Instance.DefaultBrush;
         float smoothing = 0;
