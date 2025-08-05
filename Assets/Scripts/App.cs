@@ -81,8 +81,9 @@ namespace TiltBrush
             }
         }
 
+#if OPENBRUSH
         public static PlatformConfig PlatformConfig;
-
+#endif
         void Awake()
         {
             m_Instance = this;
