@@ -25,7 +25,8 @@ namespace TiltBrush
         public static PlatformConfig PlatformConfig => Config.PlatformConfig;
         public static CanvasScript ActiveCanvas => Scene.ActiveCanvas;
 #else
-        public static CanvasScript ActiveCanvas = null;
+        CanvasScript m_Canvas;
+        public static CanvasScript ActiveCanvas => Instance.m_Canvas;
 #endif
         public static App Instance
         {
