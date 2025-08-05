@@ -8,11 +8,16 @@ public class MinimalExample : MonoBehaviour
     void Start()
     {
         BrushCatalog.m_Instance.Init();
+        BrushCatalog.m_Instance.BeginReload();
+
         var path = new List<TrTransform>
         {
              TrTransform.TRS(new Vector3(0, 0, 0), Quaternion.identity, 1),
              TrTransform.TRS(new Vector3(1, 1, 1), Quaternion.identity, 1),
-             TrTransform.TRS(new Vector3(2, 2, 2), Quaternion.identity, 1)
+             TrTransform.TRS(new Vector3(2, 2, 2), Quaternion.identity, 1),
+             TrTransform.TRS(new Vector3(3, 1, 0), Quaternion.identity, 1),
+             TrTransform.TRS(new Vector3(4, 0, -1), Quaternion.identity, 1),
+
         };
         var color = Color.blue;
         var brush = BrushCatalog.m_Instance.DefaultBrush;

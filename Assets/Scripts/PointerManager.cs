@@ -62,7 +62,7 @@ namespace TiltBrush
 #if OPENBRUSH
             return m_Pointers[NumUserPointers + i].m_Script;
 #else
-            return new PointerScript();
+            return App.Instance.m_PointerForNonOpenBrush;
 #endif
         }
         void Awake()
