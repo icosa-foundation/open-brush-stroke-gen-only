@@ -15,20 +15,30 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace TiltBrush
 {
 
     public class PointerScript : MonoBehaviour
     {
+        // ---- public types
+
+        public bool DrawingEnabled;
+        private bool m_WasDrawingEnabled;
+
+        // ---- Private inspector data
+
+        // ---- Private member data
+
         private Color m_CurrentColor;
-        private TiltBrush.BrushDescriptor m_CurrentBrush;
+        private BrushDescriptor m_CurrentBrush;
         private float m_CurrentBrushSize; // In pointer aka room space
         private Vector2 m_BrushSizeRange;
+        private float m_CurrentPressure; // TODO: remove and query line instead?
         private BaseBrushScript m_CurrentLine;
+        private List<ControlPoint> m_ControlPoints;
+        private bool m_LastControlPointIsKeeper;
 
         // ---- Public properties, accessors, events
 
@@ -73,9 +83,68 @@ namespace TiltBrush
 
         void Awake()
         {
+            m_ControlPoints = new List<ControlPoint>();
             m_CurrentBrushSize = 1.0f;
             m_BrushSizeRange.x = 1.0f;
             m_BrushSizeRange.y = 2.0f;
+            m_CurrentPressure = 1.0f;
+        }
+
+        void Update()
+        {
+            if (DrawingEnabled && !m_WasDrawingEnabled)
+            {
+                // Drawing just got enabled, so we need to create a new line.
+                // This is a no-op if the current line is already set.
+                CreateNewLine(App.ActiveCanvas, TrTransform.FromLocalTransform(transform));
+            }
+            else if (DrawingEnabled && m_WasDrawingEnabled)
+            {
+                UpdateLineFromObject();
+            }
+            else if (!DrawingEnabled && m_WasDrawingEnabled)
+            {
+                DetachLine(false);
+            }
+            m_WasDrawingEnabled = DrawingEnabled;
+        }
+
+        /// Returns xf_RS, relative to the passed line transform.
+        /// Applies m_LineDepth and ignores xf_RS.scale
+        /// TODO: see above.
+        TrTransform GetTransformForLine(Transform line, TrTransform xf_RS)
+        {
+            var xfRoomFromLine = Coords.AsRoom[line];
+            xf_RS.translation += xf_RS.forward;
+            xf_RS.scale = 1;
+            return TrTransform.InvMul(xfRoomFromLine, xf_RS);
+        }
+
+        /// Non-playback case:
+        /// - Update the stroke based on the object's position.
+        /// - Save off control points
+        /// - Play audio.
+        public void UpdateLineFromObject()
+        {
+            var xf_LS = GetTransformForLine(m_CurrentLine.transform, Coords.AsRoom[transform]);
+
+            bool bQuadCreated = m_CurrentLine.UpdatePosition_LS(xf_LS, m_CurrentPressure);
+
+            // TODO: let brush take care of storing control points, not us
+            SetControlPoint(xf_LS, isKeeper: bQuadCreated);
+            UpdateLineVisuals();
+        }
+
+        /// Playback case:
+        /// - Update stroke based on the passed transform (in local coordinates)
+        /// - Do _not_ apply any normal adjustment; it's baked into the control point
+        /// - Do not update the mesh
+        /// TODO: replace with a bulk-ControlPoint API
+        public void UpdateLineFromControlPoint(ControlPoint cp)
+        {
+            float scale = m_CurrentLine.StrokeScale;
+            m_CurrentLine.UpdatePosition_LS(
+                TrTransform.TRS(cp.m_Pos, cp.m_Orient, scale), cp.m_Pressure);
         }
 
         /// Bulk control point addition
@@ -86,6 +155,11 @@ namespace TiltBrush
             {
                 m_CurrentLine.UpdatePosition_LS(TrTransform.TRS(cp.m_Pos, cp.m_Orient, scale), cp.m_Pressure);
             }
+        }
+
+        public void UpdateLineVisuals()
+        {
+            m_CurrentLine.ApplyChangesToVisuals();
         }
 
         void _SetBrushSizeAbsolute(float value)
@@ -171,6 +245,54 @@ namespace TiltBrush
             m_CurrentLine.RandomSeed = stroke.m_Seed;
 
             return m_CurrentLine.gameObject;
+        }
+
+        /// Record the tranform as a control point.
+        /// If the most-recent point is a keeper, append a new control point.
+        /// Otherwise, the most-recent point is a keeper, and will be overwritten.
+        ///
+        /// The parameter "keep" specifies whether the newly-written point is a keeper.
+        ///
+        /// The current pointer is /not/ queried to get the transform of the new
+        /// control point. Instead, caller is responsible for passing in the same
+        /// xf that was passed to line.UpdatePosition_LS()
+        public void SetControlPoint(TrTransform lastSpawnXf_LS, bool isKeeper)
+        {
+            ControlPoint rControlPoint;
+            rControlPoint.m_Pos = lastSpawnXf_LS.translation;
+            rControlPoint.m_Orient = lastSpawnXf_LS.rotation;
+            rControlPoint.m_Pressure = m_CurrentPressure;
+            rControlPoint.m_TimestampMs = (uint)(App.Instance.CurrentSketchTime * 1000);
+
+            if (m_ControlPoints.Count == 0 || m_LastControlPointIsKeeper)
+            {
+                m_ControlPoints.Add(rControlPoint);
+            }
+            else
+            {
+                m_ControlPoints[m_ControlPoints.Count - 1] = rControlPoint;
+            }
+
+            m_LastControlPointIsKeeper = isKeeper;
+        }
+
+
+        // During playback, rMemoryObjectForPlayback is non-null, and strokeFlags should not be passed.
+        // otherwise, rMemoryObjectForPlayback is null, and strokeFlags should be valid.
+        // When non-null, rMemoryObjectForPlayback corresponds to the current line.
+        public void DetachLine(bool bDiscard)
+        {
+            if (bDiscard)
+            {
+                m_CurrentLine.DestroyMesh();
+                Destroy(m_CurrentLine.gameObject);
+            }
+            else
+            {
+                //copy master brush over to current line
+                m_CurrentLine.FinalizeSolitaryBrush();
+            }
+            m_CurrentLine = null;
         }
     }
 } // namespace TiltBrush

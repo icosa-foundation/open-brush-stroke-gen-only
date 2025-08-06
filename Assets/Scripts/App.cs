@@ -42,6 +42,23 @@ namespace TiltBrush
         }
         /// Time origin of sketch in seconds for case when drawing is not sync'd to media.
         private double m_sketchTimeBase = 0;
+        public double CurrentSketchTime =>
+            // Unity's Time.time has useful precision probably <= 1ms, and unknown
+            // drift/accuracy. It is a single (but is a double, internally), so its
+            // raw precision drops to ~2ms after ~4 hours and so on.
+            // Time.timeSinceLevelLoad is also an option.
+            //
+            // C#'s DateTime API has low-ish precision (10+ ms depending on OS)
+            // but likely the highest accuracy with respect to wallclock, since
+            // it's reading from an RTC.
+            //
+            // High-precision timers are the opposite: high precision, but are
+            // subject to drift.
+            //
+            // For realtime sync, Time.time is probably the best thing to use.
+            // For postproduction sync, probably C# DateTime.
+            // If you change this, also modify SketchTimeToLevelLoadTime
+            Time.timeSinceLevelLoad - m_sketchTimeBase;
 
         void Awake()
         {
