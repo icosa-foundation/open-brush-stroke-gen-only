@@ -5,10 +5,28 @@ using UnityEngine;
 
 public class MinimalExample : MonoBehaviour
 {
+    public TiltBrushManifest m_ManifestStandard;
+    public TiltBrushManifest m_ManifestExperimental;
+    public BrushDescriptor m_DefaultBrush;
+    public PointerScript m_Pointer;
+
+    private CanvasScript m_Canvas;
+
     void Start()
     {
-        BrushCatalog.m_Instance.Init();
+        var mergedManifest = Instantiate(m_ManifestStandard);
+        if (m_ManifestExperimental != null)
+        {
+            mergedManifest.AppendFrom(m_ManifestExperimental);
+        }
+        BrushCatalog.Init(mergedManifest);
+        m_Canvas = gameObject.AddComponent<CanvasScript>();
+        m_Pointer.Canvas = m_Canvas;
+    }
 
+    [ContextMenu("Draw Circle")]
+    public void DrawCircle()
+    {
         var path = new List<TrTransform>();
 
         int segments = 32;
@@ -22,9 +40,9 @@ public class MinimalExample : MonoBehaviour
         }
 
         var color = Color.blue;
-        var brush = BrushCatalog.m_Instance.DefaultBrush;
+        var brush = m_DefaultBrush;
         float smoothing = 0;
-        var canvas = App.ActiveCanvas;
+        var canvas = m_Canvas;
         float brushScale = 1f;
         float brushSize = 1f;
         int seed = 0;
@@ -80,7 +98,6 @@ public class MinimalExample : MonoBehaviour
             m_ControlPoints = controlPoints.ToArray(),
         };
         stroke.m_ControlPointsToDrop = Enumerable.Repeat(false, stroke.m_ControlPoints.Length).ToArray();
-        stroke.Recreate(tr, canvas);
+        stroke.Recreate(m_Pointer, tr, canvas);
     }
-
 }

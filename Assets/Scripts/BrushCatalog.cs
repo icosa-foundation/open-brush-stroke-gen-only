@@ -16,32 +16,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Brush = TiltBrush.BrushDescriptor;
 
 namespace TiltBrush
 {
-
-    [System.Serializable]
-    public struct BlocksMaterial
+    public class BrushCatalog
     {
-        public Brush brushDescriptor;
-    }
+        public static Texture2D m_GlobalNoiseTexture;
+        private static Dictionary<Guid, BrushDescriptor> m_GuidToBrush;
+        private static List<BrushDescriptor> m_GuiBrushList;
+        private static TiltBrushManifest m_Manifest;
 
-    public class BrushCatalog : MonoBehaviour
-    {
-        static public BrushCatalog m_Instance;
-
-        public Texture2D m_GlobalNoiseTexture;
-
-        [SerializeField] private Brush m_DefaultBrush;
-        private bool m_IsLoading;
-        private Dictionary<Guid, Brush> m_GuidToBrush;
-        private List<Brush> m_GuiBrushList;
-
-        [SerializeField] public BlocksMaterial[] m_BlocksMaterials;
-        private Dictionary<Material, Brush> m_MaterialToBrush;
-
-        public Brush GetBrush(Guid guid)
+        public static BrushDescriptor GetBrush(Guid guid)
         {
             try
             {
@@ -53,38 +38,20 @@ namespace TiltBrush
             }
         }
 
-        public Brush DefaultBrush => m_DefaultBrush;
-
-        void Awake()
+        public static void Init(TiltBrushManifest manifest)
         {
-            m_Instance = this;
-            Init();
-        }
+            m_Manifest = manifest;
+            m_GuidToBrush = new Dictionary<Guid, BrushDescriptor>();
+            m_GuiBrushList = new List<BrushDescriptor>();
 
-        public void Init()
-        {
-            m_GuidToBrush = new Dictionary<Guid, Brush>();
-            m_MaterialToBrush = new Dictionary<Material, Brush>();
-            m_GuiBrushList = new List<Brush>();
-
-            // Move blocks materials in to a dictionary for quick lookup.
-            for (int i = 0; i < m_BlocksMaterials.Length; ++i)
-            {
-                m_MaterialToBrush.Add(m_BlocksMaterials[i].brushDescriptor.Material,
-                    m_BlocksMaterials[i].brushDescriptor);
-            }
             Shader.SetGlobalTexture("_GlobalNoiseTexture", m_GlobalNoiseTexture);
-
-            m_IsLoading = true;
-
             var manifestBrushes = LoadBrushesInManifest();
-            manifestBrushes.Add(DefaultBrush);
 
             m_GuidToBrush.Clear();
 
             foreach (var brush in manifestBrushes)
             {
-                Brush tmp;
+                BrushDescriptor tmp;
                 if (m_GuidToBrush.TryGetValue(brush.m_Guid, out tmp) && tmp != brush)
                 {
                     Debug.LogErrorFormat("Guid collision: {0}, {1}", tmp, brush);
@@ -133,14 +100,12 @@ namespace TiltBrush
             }
         }
 
-
         // Returns brushes in both sections of the manifest (compat and non-compat)
         // Brushes that are found only in the compat section will have m_HiddenInGui = true
-        static private List<Brush> LoadBrushesInManifest()
+        private static List<BrushDescriptor> LoadBrushesInManifest()
         {
-            List<Brush> output = new List<Brush>();
-            var manifest = App.Instance.ManifestFull;
-            foreach (var desc in manifest.Brushes)
+            List<BrushDescriptor> output = new List<BrushDescriptor>();
+            foreach (var desc in m_Manifest.Brushes)
             {
                 if (desc != null)
                 {
@@ -149,7 +114,7 @@ namespace TiltBrush
             }
 
             // Additional hidden brushes
-            var hidden = manifest.CompatibilityBrushes.Except(manifest.Brushes);
+            var hidden = m_Manifest.CompatibilityBrushes.Except(m_Manifest.Brushes);
             foreach (var desc in hidden)
             {
                 if (desc != null)

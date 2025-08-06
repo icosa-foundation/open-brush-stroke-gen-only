@@ -128,7 +128,7 @@ namespace TiltBrush
         ///
         /// TODO: Consider moving the code from the "m_Type == StrokeType.BrushStroke"
         /// case of SetParentKeepWorldPosition() into here.
-        public void Recreate(TrTransform? leftTransform = null, CanvasScript canvas = null, bool absoluteScale = false)
+        public void Recreate(PointerScript pointer, TrTransform? leftTransform = null, CanvasScript canvas = null, bool absoluteScale = false)
         {
             // TODO: Try a fast-path that uses VertexLayout+GeometryPool to modify geo directly
             if (leftTransform != null || m_Type == Type.NotCreated)
@@ -144,10 +144,6 @@ namespace TiltBrush
                     LeftTransformControlPoints(leftTransform.Value, absoluteScale);
                 }
 
-                // PointerManager's pointer management is a complete mess.
-                // "5" is the most-likely to be unused. It's terrible that this
-                // needs to go through a pointer.
-                var pointer = App.Instance.m_PointerForNonOpenBrush;
                 pointer.RecreateLineFromMemory(this);
             }
             else if (canvas != null)
@@ -236,7 +232,7 @@ namespace TiltBrush
         ///
         /// Directly analagous to Transform.SetParent, except strokes may not
         /// be parented to an arbitrary Transform, only to CanvasScript.
-        public void SetParentKeepWorldPosition(CanvasScript canvas, TrTransform? leftTransform = null)
+        public void SetParentKeepWorldPosition(CanvasScript canvas, PointerScript pointer, TrTransform? leftTransform = null)
         {
             CanvasScript prevCanvas = Canvas;
             if (prevCanvas == canvas)
@@ -250,7 +246,7 @@ namespace TiltBrush
             //   newCP = (newCanvas.Pose.inverse * prevCanvas.Pose) * prevCP
             TrTransform leftTransformValue = leftTransform ?? canvas.Pose.inverse * prevCanvas.Pose;
             bool bWasTransformed = leftTransform.HasValue &&
-                !TrTransform.Approximately(App.ActiveCanvas.Pose, leftTransform.Value);
+                !TrTransform.Approximately(prevCanvas.Pose, leftTransform.Value);
             if (m_Type == Type.NotCreated || !bWasTransformed)
             {
                 SetParent(canvas);
@@ -270,7 +266,6 @@ namespace TiltBrush
                     // PointerManager's pointer management is a complete mess.
                     // "5" is the most-likely to be unused. It's terrible that this
                     // needs to go through a pointer.
-                    var pointer = App.Instance.m_PointerForNonOpenBrush;
                     pointer.RecreateLineFromMemory(this);
                 }
             }

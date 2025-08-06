@@ -26,6 +26,12 @@ namespace TiltBrush
 
         public bool DrawingEnabled;
         private bool m_WasDrawingEnabled;
+        private CanvasScript m_Canvas;
+        public CanvasScript Canvas
+        {
+            get => m_Canvas;
+            set => m_Canvas = value;
+        }
 
         // ---- Private inspector data
 
@@ -96,7 +102,7 @@ namespace TiltBrush
             {
                 // Drawing just got enabled, so we need to create a new line.
                 // This is a no-op if the current line is already set.
-                CreateNewLine(App.ActiveCanvas, TrTransform.FromLocalTransform(transform));
+                CreateNewLine(m_Canvas, TrTransform.FromLocalTransform(transform));
             }
             else if (DrawingEnabled && m_WasDrawingEnabled)
             {
@@ -126,6 +132,7 @@ namespace TiltBrush
         /// - Play audio.
         public void UpdateLineFromObject()
         {
+            if (m_CurrentLine == null) return;
             var xf_LS = GetTransformForLine(m_CurrentLine.transform, Coords.AsRoom[transform]);
 
             bool bQuadCreated = m_CurrentLine.UpdatePosition_LS(xf_LS, m_CurrentPressure);
@@ -221,7 +228,7 @@ namespace TiltBrush
 
         public GameObject BeginLineFromMemory(Stroke stroke, CanvasScript canvas)
         {
-            BrushDescriptor rBrush = BrushCatalog.m_Instance.GetBrush(stroke.m_BrushGuid);
+            BrushDescriptor rBrush = BrushCatalog.GetBrush(stroke.m_BrushGuid);
             if (rBrush == null)
             {
                 // Ignore stroke
@@ -262,7 +269,7 @@ namespace TiltBrush
             rControlPoint.m_Pos = lastSpawnXf_LS.translation;
             rControlPoint.m_Orient = lastSpawnXf_LS.rotation;
             rControlPoint.m_Pressure = m_CurrentPressure;
-            rControlPoint.m_TimestampMs = (uint)(App.Instance.CurrentSketchTime * 1000);
+            rControlPoint.m_TimestampMs = (uint)(App.CurrentSketchTime * 1000);
 
             if (m_ControlPoints.Count == 0 || m_LastControlPointIsKeeper)
             {
