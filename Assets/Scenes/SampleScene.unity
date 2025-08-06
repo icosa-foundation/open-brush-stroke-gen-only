@@ -461,18 +461,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44675101e7140eb43bd93b0f815819f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PreviewLight: {fileID: 0}
-  m_PreviewLightScalar: 1
-  m_Mesh: {fileID: 0}
-  m_PrimaryMeshes: []
-  m_BrushSizeIndicator: {fileID: 0}
-  m_BrushPressureIndicator: {fileID: 0}
-  m_PreviewLineEnabled: 0
-  m_PreviewLineControlPointLife: 1
-  m_PreviewLineIdealLength: 1
-  m_AudioSources: []
-  m_BrushAudioPitchVelocityRange: {x: 0, y: 0}
-  m_BrushPlaybackAudioClip: {fileID: 0}
+  DrawingEnabled: 0
+  m_CurrentColor: {r: 0.14640439, g: 0.2921175, b: 0.8867924, a: 0}
+  m_CurrentBrush: {fileID: 11400000, guid: b3384ba6cddfeb64ba4b7d4abed9a3e8, type: 2}
+  m_CurrentBrushSize: 1
+  m_CurrentPressure: 1
 --- !u!4 &1754669283
 Transform:
   m_ObjectHideFlags: 0

@@ -880,47 +880,6 @@ namespace TiltBrush
             {
                 mesh.SetTangents(m_Tangents);
             }
-
-#if OPENBRUSH
-            // If we aren't using the geometry shader, we need to generate triangle IDs
-            if (!App.Config.GeometryShaderSuppported)
-            {
-                GenerateTriangleIds(mesh);
-            }
-#endif
-        }
-
-        private void GenerateTriangleIds(Mesh mesh)
-        {
-            var triangleIds = new Vector2[mesh.vertexCount];
-            int triCount = mesh.triangles.Length / 3;
-            var tris = mesh.triangles;
-            for (int i = 0; i < triCount; i++)
-            {
-                Vector2 uv = new Vector2(i, 0);
-                int triIndex = i * 3;
-                triangleIds[tris[triIndex]] = uv;
-                triangleIds[tris[triIndex + 1]] = uv;
-                triangleIds[tris[triIndex + 2]] = uv;
-            }
-            mesh.SetUVs(4, triangleIds);
-        }
-
-        private void GenerateTriangleIds(Mesh mesh, int iVert, int nVert)
-        {
-            var triangleIds = new Vector2[nVert];
-            for (int i = 0; i < mesh.triangles.Length; i += 3)
-            {
-                int triIndex = Mathf.FloorToInt(i / 3);
-                Vector2 uv = new Vector2(triIndex, 0);
-                if (mesh.triangles[i] >= iVert && mesh.triangles[i] < iVert + nVert)
-                    triangleIds[mesh.triangles[i] - iVert] = uv;
-                if (mesh.triangles[i + 1] >= iVert && mesh.triangles[i + 1] < iVert + nVert)
-                    triangleIds[mesh.triangles[i + 1] - iVert] = uv;
-                if (mesh.triangles[i + 2] >= iVert && mesh.triangles[i + 2] < iVert + nVert)
-                    triangleIds[mesh.triangles[i + 2] - iVert] = uv;
-            }
-            mesh.SetUVs(4, triangleIds);
         }
 
         /// Like CopyToMesh(), except copies a sub-chunk of verts and triangles.
@@ -972,14 +931,6 @@ namespace TiltBrush
             {
                 mesh.tangents = SubArray(m_Tangents, iVert, nVert);
             }
-
-#if OPENBRUSH
-            // If we aren't using the geometry shader, we need to generate triangle IDs
-            if (!App.Config.GeometryShaderSuppported)
-            {
-                GenerateTriangleIds(mesh, iVert, nVert);
-            }
-#endif
         }
 
         static int GetVertexCount(Stroke stroke)
@@ -991,51 +942,12 @@ namespace TiltBrush
                 Debug.LogWarning($"Stroke of type {BrushCatalog.m_Instance.GetBrush(stroke.m_BrushGuid)} has no mesh");
                 return 0;
             }
-#if OPENBRUSH
-            else if (stroke.m_Type == Stroke.Type.BatchedBrushStroke)
-            {
-                return stroke.m_BatchSubset.m_VertLength;
-            }
-#endif
             else
             {
                 throw new InvalidOperationException();
             }
         }
-#if OPENBRUSH
-        /// Append all geometry from the specified stroke to this pool.
-        /// Vertex layouts must be identical.
-        /// Optional vertexLimit is the maximum number of vertices allowed in the pool.
-        /// Returns false if the append would push the pool over the limit.
-        public bool Append(Stroke stroke, int vertexLimit = 0)
-        {
-            if (vertexLimit > 0)
-            {
-                int newCount = NumVerts + GetVertexCount(stroke);
-                if (newCount > vertexLimit)
-                {
-                    return false;
-                }
-            }
-            EnsureGeometryResident();
 
-            if (stroke.m_Type == Stroke.Type.BrushStroke)
-            {
-                Append(stroke.m_Object.GetComponent<MeshFilter>().sharedMesh,
-                    BrushCatalog.m_Instance.GetBrush(stroke.m_BrushGuid).VertexLayout);
-            }
-            else if (stroke.m_Type == Stroke.Type.BatchedBrushStroke)
-            {
-                Append(stroke.m_BatchSubset);
-            }
-            else
-            {
-                throw new InvalidOperationException();
-            }
-
-            return true;
-        }
-#endif
         /// Appends vertices, and topology for all submeshes, to this pool.
         ///
         /// Pass:
@@ -1174,17 +1086,7 @@ namespace TiltBrush
 
             VerifySizes();
         }
-#if OPENBRUSH
-        /// Append all geometry from the subset to this pool.
-        /// Vertex layouts must be identical
-        public void Append(BatchSubset subset)
-        {
-            GeometryPool geom = subset.m_ParentBatch.Geometry;
-            Append(geom,
-                subset.m_StartVertIndex, subset.m_VertLength,
-                subset.m_iTriIndex, subset.m_nTriIndex);
-        }
-#endif
+
         /// Does not copy vertex format -- caller can do that, if desired
         /// Bad things will happen if the rhs does not have all the vertex
         /// data needed by lhs.
@@ -1453,119 +1355,6 @@ namespace TiltBrush
             }
             return ok;
         }
-#if OPENBRUSH
-        private static void WriteTexcoordData(
-            SketchBinaryWriter writer, TexcoordData texcoordData, int texcoordSize)
-        {
-            switch (texcoordSize)
-            {
-                case 2:
-                    writer.WriteLengthPrefixed(texcoordData.v2);
-                    break;
-                case 3:
-                    writer.WriteLengthPrefixed(texcoordData.v3);
-                    break;
-                case 4:
-                    writer.WriteLengthPrefixed(texcoordData.v4);
-                    break;
-            }
-        }
-
-        /// Public only for unit-testing purposes; not general-purpose.
-        /// Only the minimum state necessary for EnsureGeometryResident gets serialized.
-        /// In particular: Layout, etc are skipped.
-        public void SerializeToStream(Stream stream)
-        {
-            using (var writer = new SketchBinaryWriter(stream))
-            {
-                writer.UInt32(kMagic);
-                writer.WriteLengthPrefixed(m_Tris);
-                writer.WriteLengthPrefixed(m_Vertices);
-                if (m_Layout.bUseNormals)
-                {
-                    writer.WriteLengthPrefixed(m_Normals);
-                }
-                if (m_Layout.bUseColors)
-                {
-                    writer.WriteLengthPrefixed(m_Colors);
-                }
-                if (m_Layout.bUseTangents)
-                {
-                    writer.WriteLengthPrefixed(m_Tangents);
-                }
-                for (int channel = 0; channel < kNumTexcoords; ++channel)
-                {
-                    WriteTexcoordData(writer, GetTexcoordData(channel), m_Layout.GetTexcoordInfo(channel).size);
-                }
-            }
-        }
-
-        private static bool ReadTexcoordData(
-            SketchBinaryReader reader, out TexcoordData texcoordData, int texcoordSize, int numVerts)
-        {
-            texcoordData = new TexcoordData();
-            switch (texcoordSize)
-            {
-                case 0:
-                    return true;
-                case 2:
-                    texcoordData.v2 = new List<Vector2>();
-                    return reader.ReadIntoExact(texcoordData.v2, numVerts);
-                case 3:
-                    texcoordData.v3 = new List<Vector3>();
-                    return reader.ReadIntoExact(texcoordData.v3, numVerts);
-                case 4:
-                    texcoordData.v4 = new List<Vector4>();
-                    return reader.ReadIntoExact(texcoordData.v4, numVerts);
-            }
-            throw new ArgumentException("texcoordSize");
-        }
-
-        /// Public only for unit-testing purposes; not general-purpose.
-        /// this.Layout is used to validate the stream's contents.
-        /// It is not read from (or even stored in) the stream.
-        public bool DeserializeFromStream(Stream stream)
-        {
-            using (var reader = new SketchBinaryReader(stream))
-            {
-                int numVerts = NumVerts;
-                int numTriIndices = NumTriIndices;
-                if (reader.UInt32() != kMagic) { return false; }
-
-                if (m_Tris == null) { m_Tris = new List<int>(); }
-                if (!reader.ReadIntoExact(m_Tris, numTriIndices)) { return false; }
-
-                if (m_Vertices == null) { m_Vertices = new List<Vector3>(); }
-                if (!reader.ReadIntoExact(m_Vertices, numVerts)) { return false; }
-
-                if (m_Layout.bUseNormals)
-                {
-                    if (m_Normals == null) { m_Normals = new List<Vector3>(); }
-                    if (!reader.ReadIntoExact(m_Normals, numVerts)) { return false; }
-                }
-                if (m_Layout.bUseColors)
-                {
-                    if (m_Colors == null) { m_Colors = new List<Color32>(); }
-                    if (!reader.ReadIntoExact(m_Colors, numVerts)) { return false; }
-                }
-                if (m_Layout.bUseTangents)
-                {
-                    if (m_Tangents == null) { m_Tangents = new List<Vector4>(); }
-                    if (!reader.ReadIntoExact(m_Tangents, numVerts)) { return false; }
-                }
-                for (int channel = 0; channel < kNumTexcoords; ++channel)
-                {
-                    TexcoordInfo txcInfo = m_Layout.GetTexcoordInfo(channel);
-                    if (!ReadTexcoordData(reader, out TexcoordData txcData, txcInfo.size, numVerts))
-                    {
-                        return false;
-                    }
-                    InternalGetTexcoordDataRef(channel) = txcData;
-                }
-            }
-            return true;
-        }
-#endif
     }
 
 } // namespace TiltBrush
