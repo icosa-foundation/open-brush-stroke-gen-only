@@ -31,11 +31,11 @@ namespace TiltBrush
 
         // ---- Private member data
 
-        private Color m_CurrentColor;
-        private BrushDescriptor m_CurrentBrush;
-        private float m_CurrentBrushSize; // In pointer aka room space
+        public Color m_CurrentColor;
+        public BrushDescriptor m_CurrentBrush;
+        public float m_CurrentBrushSize; // In pointer aka room space
         private Vector2 m_BrushSizeRange;
-        private float m_CurrentPressure; // TODO: remove and query line instead?
+        public float m_CurrentPressure; // TODO: remove and query line instead?
         private BaseBrushScript m_CurrentLine;
         private List<ControlPoint> m_ControlPoints;
         private bool m_LastControlPointIsKeeper;
