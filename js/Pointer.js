@@ -1,4 +1,9 @@
-import { BufferGeometry, LineBasicMaterial, LineLoop } from 'three';
+import {
+  CatmullRomCurve3,
+  MeshBasicMaterial,
+  Mesh,
+  TubeGeometry,
+} from 'three';
 import { StrokeType } from './Stroke.js';
 
 export class Pointer {
@@ -23,17 +28,23 @@ export class Pointer {
 
   recreateLineFromMemory(stroke) {
     const points = stroke.controlPoints.map(cp => cp.pos);
-    const geometry = new BufferGeometry().setFromPoints(points);
-    const material = new LineBasicMaterial({ color: stroke.color });
-    const line = new LineLoop(geometry, material);
-    this.canvas.add(line);
+
+    // Build a tube mesh along the control point path
+    const curve = new CatmullRomCurve3(points, true);
+    const tubularSegments = Math.max(32, points.length * 8);
+    const radius = stroke.brushSize || 0.05;
+    const geometry = new TubeGeometry(curve, tubularSegments, radius, 8, true);
+    const material = new MeshBasicMaterial({ color: stroke.color });
+    const mesh = new Mesh(geometry, material);
+    this.canvas.add(mesh);
+
     stroke.object = {
       canvas: this.canvas,
       hideBrush: hide => {
-        line.visible = !hide;
+        mesh.visible = !hide;
       },
       setParent: parent => {
-        parent.add(line);
+        parent.add(mesh);
         this.canvas = parent;
       },
     };

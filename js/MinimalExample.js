@@ -1,12 +1,10 @@
-import { Scene, Group, Vector3, Quaternion, Color } from 'three';
-import { pathToFileURL } from 'node:url';
+import { Group, Vector3, Quaternion, Color } from 'three';
 import { TrTransform } from './TrTransform.js';
 import { ControlPoint } from './ControlPoint.js';
-import { Stroke, StrokeType } from './Stroke.js';
+import { Stroke } from './Stroke.js';
 import { Pointer } from './Pointer.js';
 
-export function drawCircle() {
-  const scene = new Scene();
+export function createCircleStroke(scene) {
   const canvas = new Group();
   scene.add(canvas);
 
@@ -38,7 +36,7 @@ export function drawCircle() {
   stroke.intendedCanvas = canvas;
   stroke.brushGuid = 'default';
   stroke.brushScale = 1;
-  stroke.brushSize = 1;
+  stroke.brushSize = 0.05;
   stroke.color = new Color('blue');
   stroke.seed = 0;
   stroke.controlPoints = controlPoints;
@@ -46,10 +44,5 @@ export function drawCircle() {
 
   stroke.recreate(pointer, TrTransform.identity, canvas);
 
-  console.log(`Created stroke with ${controlPoints.length} control points.`);
-  console.log(`Canvas has ${canvas.children.length} object(s).`);
-}
-
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  drawCircle();
+  return { canvas, stroke };
 }
