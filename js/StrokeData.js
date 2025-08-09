@@ -1,5 +1,4 @@
 import { Color } from 'three';
-import { randomUUID } from 'node:crypto';
 import { ControlPoint } from './ControlPoint.js';
 
 export class StrokeData {
@@ -24,7 +23,12 @@ export class StrokeData {
       this.seed = 0;
       this.controlPoints = [];
     }
-    this.guid = randomUUID();
+
+    const uuidFn = globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function'
+      ? () => globalThis.crypto.randomUUID()
+      : () => Math.random().toString(36).slice(2);
+
+    this.guid = uuidFn();
   }
 }
 
