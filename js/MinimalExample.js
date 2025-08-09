@@ -1,9 +1,9 @@
 import {
   Scene,
   Group,
-  BufferGeometry,
-  LineBasicMaterial,
-  LineLoop,
+  Mesh,
+  MeshBasicMaterial,
+  DoubleSide,
   Vector3,
   Quaternion,
   Color,
@@ -12,6 +12,7 @@ import { pathToFileURL } from 'node:url';
 import { TrTransform } from './TrTransform.js';
 import { ControlPoint } from './ControlPoint.js';
 import { Stroke, StrokeType } from './Stroke.js';
+import { SimpleBrush } from './SimpleBrush.js';
 
 class Pointer {
   constructor(canvas) {
@@ -19,18 +20,17 @@ class Pointer {
   }
 
   recreateLineFromMemory(stroke) {
-    const points = stroke.controlPoints.map(cp => cp.pos);
-    const geometry = new BufferGeometry().setFromPoints(points);
-    const material = new LineBasicMaterial({ color: stroke.color });
-    const line = new LineLoop(geometry, material);
-    this.canvas.add(line);
+    const geometry = SimpleBrush.buildGeometry(stroke.controlPoints, stroke.brushSize);
+    const material = new MeshBasicMaterial({ color: stroke.color, side: DoubleSide });
+    const mesh = new Mesh(geometry, material);
+    this.canvas.add(mesh);
     stroke.object = {
       canvas: this.canvas,
       hideBrush: hide => {
-        line.visible = !hide;
+        mesh.visible = !hide;
       },
       setParent: parent => {
-        parent.add(line);
+        parent.add(mesh);
         this.canvas = parent;
       },
     };
