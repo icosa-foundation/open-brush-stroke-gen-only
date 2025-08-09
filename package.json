@@ -1,0 +1,9 @@
+{
+  "name": "open-brush-stroke-gen-js",
+  "version": "1.0.0",
+  "description": "JavaScript utilities ported from Unity C# for three.js",
+  "type": "module",
+  "dependencies": {
+    "three": "^0.164.0"
+  }
+}
