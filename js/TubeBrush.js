@@ -96,10 +96,13 @@ export class TubeBrush extends GeometryBrush {
     for (let i = 0; i < cpCount - 1; i++) {
       for (let j = 0; j < radialSegments; j++) {
         const a = i * radialSegments + j;
-        const b = a + radialSegments;
+        const b = (i + 1) * radialSegments + j;
         const c = i * radialSegments + (j + 1) % radialSegments;
-        const d = b + (j + 1) % radialSegments;
-        indices.push(a, b, c, c, b, d);
+        const d = (i + 1) * radialSegments + (j + 1) % radialSegments;
+
+        // Form two triangles for the quad between ring i and i+1 at segment j.
+        indices.push(a, b, d);
+        indices.push(a, d, c);
       }
     }
 
