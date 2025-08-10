@@ -1,10 +1,3 @@
-import {
-  CatmullRomCurve3,
-  Mesh,
-  MeshStandardMaterial,
-  TubeGeometry,
-  Vector3,
-} from 'three';
 import { BaseBrush } from './BaseBrush.js';
 
 // Simplified port of Tilt Brush's GeometryBrush base class.

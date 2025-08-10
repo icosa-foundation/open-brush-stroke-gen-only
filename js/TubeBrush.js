@@ -1,32 +1,69 @@
 import {
-  CatmullRomCurve3,
+  BufferGeometry,
+  Float32BufferAttribute,
   Mesh,
   MeshBasicMaterial,
-  TubeGeometry,
+  Vector3,
 } from 'three';
 import { GeometryBrush } from './GeometryBrush.js';
-import { ControlPoint } from './ControlPoint.js';
 
-// Port of Tilt Brush's TubeBrush. This simplified version builds a tube mesh
-// along the collected control points using Three.js's TubeGeometry.
+// Port of Tilt Brush's TubeBrush. This version builds a tube mesh
+// along the collected control points using custom BufferGeometry rather
+// than Three.js's TubeGeometry helper.
 export class TubeBrush extends GeometryBrush {
   constructor() {
     super({ canBatch: true, upperBoundVertsPerKnot: 24, doubleSided: false });
     this.pointsInClosedCircle = 8;
   }
 
-  // Generate a tube mesh following the stored control points.
+  // Generate a tube mesh along control points without relying on Three.js helpers.
   createMesh() {
-    if (this.controlPoints.length < 2) {
+    const cpCount = this.controlPoints.length;
+    if (cpCount < 2) {
       return null;
     }
-    const curvePoints = this.controlPoints.map(cp => cp.pos.clone());
-    const curve = new CatmullRomCurve3(curvePoints, false);
-    const tubularSegments = Math.max(32, curvePoints.length * 8);
+
     const radius = this.BaseSize_LS || 0.01;
     const radialSegments = this.pointsInClosedCircle;
-    const closed = false;
-    const geometry = new TubeGeometry(curve, tubularSegments, radius, radialSegments, closed);
+
+    const positions = [];
+    const normals = [];
+    const uvs = [];
+    const indices = [];
+
+    const tmpPos = new Vector3();
+    const tmpNormal = new Vector3();
+
+    for (let i = 0; i < cpCount; i++) {
+      const cp = this.controlPoints[i];
+      for (let j = 0; j < radialSegments; j++) {
+        const angle = (j / radialSegments) * Math.PI * 2;
+        tmpPos.set(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
+        tmpNormal.copy(tmpPos).normalize();
+        tmpPos.applyQuaternion(cp.orient).add(cp.pos);
+        tmpNormal.applyQuaternion(cp.orient);
+        positions.push(tmpPos.x, tmpPos.y, tmpPos.z);
+        normals.push(tmpNormal.x, tmpNormal.y, tmpNormal.z);
+        uvs.push(j / radialSegments, i / (cpCount - 1));
+      }
+    }
+
+    for (let i = 0; i < cpCount - 1; i++) {
+      for (let j = 0; j < radialSegments; j++) {
+        const a = i * radialSegments + j;
+        const b = a + radialSegments;
+        const c = i * radialSegments + (j + 1) % radialSegments;
+        const d = b + (j + 1) % radialSegments;
+        indices.push(a, b, c, c, b, d);
+      }
+    }
+
+    const geometry = new BufferGeometry();
+    geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
+    geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
+    geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2));
+    geometry.setIndex(indices);
+
     // Use a basic material so the stroke is visible without scene lighting.
     const material = new MeshBasicMaterial({ color: this.CurrentColor });
     return new Mesh(geometry, material);
