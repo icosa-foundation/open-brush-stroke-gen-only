@@ -37,7 +37,14 @@ export class TubeBrush extends GeometryBrush {
   }
 
   controlPointsChanged(startIndex) {
-    // TODO: implement geometry update for modified control points
+    // For now, rebuild the entire mesh whenever control points change.
+    // This mirrors the C# behavior that regenerates geometry incrementally,
+    // but keeps the implementation simple until partial updates are ported.
+    if (this.controlPoints.length < 2) {
+      return;
+    }
+    // Recreate the mesh to reflect new control points.
+    this.finalizeStroke();
   }
 
   onChangedFrameKnots(startIndex) {
