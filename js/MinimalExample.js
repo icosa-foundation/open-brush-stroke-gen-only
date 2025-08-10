@@ -2,6 +2,7 @@ import { Group, Vector3, Quaternion, Color } from 'three';
 import { ControlPoint } from './ControlPoint.js';
 import BrushCatalog from './BrushCatalog.js';
 import BrushDescriptor from './BrushDescriptor.js';
+import BrushManifest from './BrushManifest.js';
 import Pointer from './Pointer.js';
 import { Stroke } from './Stroke.js';
 import TubeBrush from './TubeBrush.js';
@@ -32,7 +33,7 @@ export function createCircleStroke(scene) {
   tubeDesc.m_DurableName = 'TubeBrush';
   tubeDesc.m_LocalizedDescription = 'Tube Brush';
   tubeDesc.m_BrushPrefab = TubeBrush;
-  const manifest = { Brushes: [tubeDesc], CompatibilityBrushes: [] };
+  const manifest = BrushManifest.fromJSON({ Brushes: [tubeDesc], CompatibilityBrushes: [] });
   BrushCatalog.Init(manifest);
 
   const pointer = new Pointer(canvas);
