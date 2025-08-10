@@ -50,13 +50,25 @@ export class TrTransform {
   }
 
   static fromTransform(xf) {
-    // TODO: Implement using three.js Object3D
-    throw new Error('fromTransform not implemented');
+    if (!xf) {
+      throw new Error('fromTransform requires an Object3D');
+    }
+    xf.updateMatrixWorld();
+    const t = new Vector3();
+    const r = new Quaternion();
+    const s = new Vector3();
+    xf.matrixWorld.decompose(t, r, s);
+    return new TrTransform(t, r, s.x);
   }
 
   static fromLocalTransform(xf) {
-    // TODO: Implement using three.js Object3D
-    throw new Error('fromLocalTransform not implemented');
+    if (!xf) {
+      throw new Error('fromLocalTransform requires an Object3D');
+    }
+    const t = xf.position.clone();
+    const r = xf.quaternion.clone();
+    const s = xf.scale.x;
+    return new TrTransform(t, r, s);
   }
 
   static invMul(a, b) {
@@ -185,13 +197,29 @@ export class TrTransform {
   }
 
   toTransform(xf) {
-    // TODO: Implement using three.js Object3D
-    throw new Error('toTransform not implemented');
+    if (!xf) {
+      throw new Error('toTransform requires an Object3D');
+    }
+    const m = this.toMatrix4();
+    if (xf.parent) {
+      xf.parent.updateMatrixWorld();
+      const parentInv = new Matrix4().copy(xf.parent.matrixWorld).invert();
+      m.premultiply(parentInv);
+    }
+    m.decompose(xf.position, xf.quaternion, xf.scale);
+    xf.updateMatrix();
+    xf.updateMatrixWorld(true);
   }
 
   toLocalTransform(xf) {
-    // TODO: Implement using three.js Object3D
-    throw new Error('toLocalTransform not implemented');
+    if (!xf) {
+      throw new Error('toLocalTransform requires an Object3D');
+    }
+    xf.position.copy(this.translation);
+    xf.quaternion.copy(this.rotation);
+    xf.scale.setScalar(this.scale);
+    xf.updateMatrix();
+    xf.updateMatrixWorld(true);
   }
 
   transformBy(rhs) {

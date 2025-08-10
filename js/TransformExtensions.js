@@ -48,13 +48,19 @@ export class RelativeAccessor {
   }
 
   get(xf) {
-    // TODO: compute transform relative to parent
-    throw new Error('RelativeAccessor.get not implemented');
+    const parentTf = this.parent
+      ? TrTransform.fromTransform(this.parent)
+      : TrTransform.identity;
+    const childTf = TrTransform.fromTransform(xf);
+    return TrTransform.invMul(parentTf, childTf);
   }
 
   set(xf, value) {
-    // TODO: set transform relative to parent
-    throw new Error('RelativeAccessor.set not implemented');
+    const parentTf = this.parent
+      ? TrTransform.fromTransform(this.parent)
+      : TrTransform.identity;
+    const world = parentTf.mul(value);
+    world.toTransform(xf);
   }
 }
 
