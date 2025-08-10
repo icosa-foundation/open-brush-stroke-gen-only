@@ -1,5 +1,4 @@
 import { StrokeType } from './Stroke.js';
-import { TubeBrush } from './TubeBrush.js';
 import { TrTransform } from './TrTransform.js';
 import BrushCatalog from './BrushCatalog.js';
 
@@ -11,12 +10,16 @@ export class Pointer {
   }
 
   /**
-   * Begin a stroke using the provided Stroke data. The stroke should have
-   * brushGuid, color, brushSize, and optional brushScale fields populated.
-   */
+  * Begin a stroke using the provided Stroke data. The stroke should have
+  * brushGuid, color, brushSize, and optional brushScale fields populated.
+  */
   beginStroke(stroke) {
     const desc = BrushCatalog.GetBrush(stroke.brushGuid);
-    this.currentBrush = new TubeBrush();
+    if (!desc || !desc.m_BrushPrefab) {
+      console.error(`No brush prefab for guid ${stroke.brushGuid}`);
+      return;
+    }
+    this.currentBrush = new desc.m_BrushPrefab();
     if (stroke.color) {
       this.currentBrush.m_Color.copy(stroke.color);
     }

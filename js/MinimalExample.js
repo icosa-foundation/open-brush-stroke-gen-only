@@ -4,6 +4,7 @@ import BrushCatalog from './BrushCatalog.js';
 import BrushDescriptor from './BrushDescriptor.js';
 import Pointer from './Pointer.js';
 import { Stroke } from './Stroke.js';
+import TubeBrush from './TubeBrush.js';
 
 export function createCircleStroke(scene) {
   const canvas = new Group();
@@ -30,6 +31,7 @@ export function createCircleStroke(scene) {
   tubeDesc.m_Guid = 'tube-brush';
   tubeDesc.m_DurableName = 'TubeBrush';
   tubeDesc.m_LocalizedDescription = 'Tube Brush';
+  tubeDesc.m_BrushPrefab = TubeBrush;
   const manifest = { Brushes: [tubeDesc], CompatibilityBrushes: [] };
   BrushCatalog.Init(manifest);
 
