@@ -1,14 +1,11 @@
 import { Group, Vector3, Quaternion, Color } from 'three';
 import { TrTransform } from './TrTransform.js';
 import { ControlPoint } from './ControlPoint.js';
-import { Stroke } from './Stroke.js';
-import { Pointer } from './Pointer.js';
+import { TubeBrush } from './TubeBrush.js';
 
 export function createCircleStroke(scene) {
   const canvas = new Group();
   scene.add(canvas);
-
-  const pointer = new Pointer(canvas);
 
   const path = [];
   const segments = 32;
@@ -32,17 +29,15 @@ export function createCircleStroke(scene) {
     controlPoints.push(cp);
   }
 
-  const stroke = new Stroke();
-  stroke.intendedCanvas = canvas;
-  stroke.brushGuid = 'default';
-  stroke.brushScale = 1;
-  stroke.brushSize = 0.05;
-  stroke.color = new Color('blue');
-  stroke.seed = 0;
-  stroke.controlPoints = controlPoints;
-  stroke.controlPointsToDrop = new Array(controlPoints.length).fill(false);
+  const brush = new TubeBrush();
+  brush.m_Color = new Color('blue');
+  brush.BaseSize_PS = 0.05;
+  brush.initBrush({ description: 'TubeBrush' }, TrTransform.identity);
+  for (const cp of controlPoints) {
+    brush.addControlPoint(cp);
+  }
+  brush.finalizeStroke();
+  canvas.add(brush.group);
 
-  stroke.recreate(pointer, TrTransform.identity, canvas);
-
-  return { canvas, stroke };
+  return { canvas, brush };
 }
