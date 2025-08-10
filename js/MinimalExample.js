@@ -42,5 +42,7 @@ export function createCircleStroke(scene) {
   brush.finalizeStroke();
   canvas.add(brush.group);
 
+  console.log(`Created TubeBrush stroke with ${controlPoints.length} control points`);
+
   return { canvas, brush };
 }

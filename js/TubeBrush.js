@@ -1,7 +1,7 @@
 import {
   CatmullRomCurve3,
   Mesh,
-  MeshStandardMaterial,
+  MeshBasicMaterial,
   TubeGeometry,
 } from 'three';
 import { GeometryBrush } from './GeometryBrush.js';
@@ -27,7 +27,8 @@ export class TubeBrush extends GeometryBrush {
     const radialSegments = this.pointsInClosedCircle;
     const closed = false;
     const geometry = new TubeGeometry(curve, tubularSegments, radius, radialSegments, closed);
-    const material = new MeshStandardMaterial({ color: this.CurrentColor });
+    // Use a basic material so the stroke is visible without scene lighting.
+    const material = new MeshBasicMaterial({ color: this.CurrentColor });
     return new Mesh(geometry, material);
   }
 }
