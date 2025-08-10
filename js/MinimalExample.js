@@ -1,35 +1,30 @@
 import { Group, Vector3, Quaternion, Color } from 'three';
-import { TrTransform } from './TrTransform.js';
 import { ControlPoint } from './ControlPoint.js';
-import { TubeBrush } from './TubeBrush.js';
 import BrushCatalog from './BrushCatalog.js';
 import BrushDescriptor from './BrushDescriptor.js';
+import Pointer from './Pointer.js';
+import { Stroke } from './Stroke.js';
 
 export function createCircleStroke(scene) {
   const canvas = new Group();
   scene.add(canvas);
 
-  const path = [];
+  const controlPoints = [];
   const segments = 32;
   const radius = 1.5;
   for (let i = 0; i < segments; i++) {
     const angle = (i * 2 * Math.PI) / segments;
     const position = new Vector3(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
     const rotation = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), angle);
-    path.push(TrTransform.TRS(position, rotation, 1));
-  }
-
-  const controlPoints = [];
-  let time = 0;
-  for (const tr of path) {
-    const cp = new ControlPoint(
-      tr.translation.clone(),
-      tr.rotation.clone(),
-      tr.scale,
-      time++
-    );
+    const cp = new ControlPoint(position, rotation, 1, i);
     controlPoints.push(cp);
   }
+
+  const stroke = new Stroke();
+  stroke.controlPoints = controlPoints;
+  stroke.color = new Color('blue');
+  stroke.brushGuid = 'tube-brush';
+  stroke.brushSize = 0.05;
 
   const tubeDesc = new BrushDescriptor();
   tubeDesc.m_Guid = 'tube-brush';
@@ -37,18 +32,11 @@ export function createCircleStroke(scene) {
   tubeDesc.m_LocalizedDescription = 'Tube Brush';
   const manifest = { Brushes: [tubeDesc], CompatibilityBrushes: [] };
   BrushCatalog.Init(manifest);
-  const desc = BrushCatalog.GetBrush('tube-brush');
-  const brush = new TubeBrush();
-  brush.m_Color = new Color('blue');
-  brush.BaseSize_PS = 0.05;
-  brush.initBrush(desc, TrTransform.identity);
-  for (const cp of controlPoints) {
-    brush.addControlPoint(cp);
-  }
-  brush.finalizeStroke();
-  canvas.add(brush.group);
 
-  console.log(`Created TubeBrush stroke with ${controlPoints.length} control points`);
+  const pointer = new Pointer(canvas);
+  pointer.recreateLineFromMemory(stroke);
 
-  return { canvas, brush };
+  console.log(`Created TubeBrush stroke with ${stroke.controlPoints.length} control points`);
+
+  return { canvas, stroke };
 }

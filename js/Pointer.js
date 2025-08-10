@@ -1,53 +1,70 @@
-import {
-  CatmullRomCurve3,
-  MeshBasicMaterial,
-  Mesh,
-  TubeGeometry,
-} from 'three';
 import { StrokeType } from './Stroke.js';
+import { TubeBrush } from './TubeBrush.js';
+import { TrTransform } from './TrTransform.js';
+import BrushCatalog from './BrushCatalog.js';
 
 export class Pointer {
   constructor(canvas) {
     this.canvas = canvas;
+    this.currentBrush = null;
+    this.currentStroke = null;
   }
 
-  // TODO: initialize drawing with the given brush
-  beginStroke(brush) {
-    // Implementation will integrate brush-specific behavior
+  /**
+   * Begin a stroke using the provided Stroke data. The stroke should have
+   * brushGuid, color, brushSize, and optional brushScale fields populated.
+   */
+  beginStroke(stroke) {
+    const desc = BrushCatalog.GetBrush(stroke.brushGuid);
+    this.currentBrush = new TubeBrush();
+    if (stroke.color) {
+      this.currentBrush.m_Color.copy(stroke.color);
+    }
+    this.currentBrush.BaseSize_PS = stroke.brushSize || 0.01;
+    this.currentBrush.initBrush(desc, TrTransform.identity);
+    this.currentStroke = stroke;
+    this.currentStroke.controlPoints = this.currentStroke.controlPoints || [];
   }
 
-  // TODO: add a new control point to the current stroke
+  /** Add a control point to the active stroke. */
   updateStroke(controlPoint) {
-    // Implementation will build stroke geometry incrementally
+    if (!this.currentBrush || !this.currentStroke) return;
+    this.currentBrush.addControlPoint(controlPoint);
+    this.currentStroke.controlPoints.push(controlPoint);
   }
 
-  // TODO: finalize the stroke and commit geometry
+  /** Finalize the active stroke and add its mesh to the canvas. */
   endStroke() {
-    // Implementation will finalize stroke creation
-  }
+    if (!this.currentBrush || !this.currentStroke) return null;
 
-  recreateLineFromMemory(stroke) {
-    const points = stroke.controlPoints.map(cp => cp.pos);
+    this.currentBrush.finalizeStroke();
+    this.canvas.add(this.currentBrush.group);
 
-    // Build a tube mesh along the control point path
-    const curve = new CatmullRomCurve3(points, true);
-    const tubularSegments = Math.max(32, points.length * 8);
-    const radius = stroke.brushSize || 0.05;
-    const geometry = new TubeGeometry(curve, tubularSegments, radius, 8, true);
-    const material = new MeshBasicMaterial({ color: stroke.color });
-    const mesh = new Mesh(geometry, material);
-    this.canvas.add(mesh);
-
+    const brushRef = this.currentBrush;
+    const stroke = this.currentStroke;
     stroke.object = {
       canvas: this.canvas,
       hideBrush: hide => {
-        mesh.visible = !hide;
+        brushRef.group.visible = !hide;
       },
       setParent: parent => {
-        parent.add(mesh);
+        parent.add(brushRef.group);
         this.canvas = parent;
       },
     };
     stroke.type = StrokeType.BrushStroke;
+
+    this.currentBrush = null;
+    this.currentStroke = null;
+    return stroke;
+  }
+
+  /** Recreate a stroke's mesh from stored control points. */
+  recreateLineFromMemory(stroke) {
+    this.beginStroke(stroke);
+    for (const cp of stroke.controlPoints) {
+      this.currentBrush.addControlPoint(cp);
+    }
+    return this.endStroke();
   }
 }
