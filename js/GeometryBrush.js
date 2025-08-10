@@ -16,6 +16,17 @@ export class GeometryBrush extends BaseBrush {
     this.controlPoints.length = 0;
   }
 
+  resetBrushForPreview(unusedXf) {
+    super.resetBrushForPreview(unusedXf);
+    this.controlPoints.length = 0;
+    if (this.mesh) {
+      this.group.remove(this.mesh);
+      this.mesh.geometry.dispose();
+      this.mesh.material.dispose();
+      this.mesh = null;
+    }
+  }
+
   // Store control points for later geometry generation.
   addControlPoint(cp) {
     this.controlPoints.push(cp);

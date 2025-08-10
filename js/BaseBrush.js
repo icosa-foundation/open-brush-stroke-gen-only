@@ -82,12 +82,21 @@ export class BaseBrush {
     // TODO: implement brush-specific initialization
   }
 
+  resetBrushForPreview(unusedXf) {
+    // TODO: reset brush state for preview rendering
+  }
+
   addControlPoint(cp, pointer, pressure, timestamp) {
     // TODO: handle control point addition
   }
 
   finalizeStroke() {
     // TODO: finalize stroke geometry
+  }
+
+  getSpawnInterval(pressure01) {
+    // TODO: return how far apart to spawn control points based on pressure
+    return 0;
   }
 }
 

@@ -16,6 +16,51 @@ export class TubeBrush extends GeometryBrush {
     this.pointsInClosedCircle = 8;
   }
 
+  initBrush(desc, localPointerXf) {
+    super.initBrush(desc, localPointerXf);
+    // TODO: mirror TubeBrush-specific initialization from C# version
+  }
+
+  resetBrushForPreview(unusedXf) {
+    super.resetBrushForPreview(unusedXf);
+    // TODO: clear any TubeBrush preview-specific state
+  }
+
+  addControlPoint(cp) {
+    super.addControlPoint(cp);
+    this.controlPointsChanged(this.controlPoints.length - 1);
+  }
+
+  getSpawnInterval(pressure01) {
+    // TODO: compute spawn interval based on pressure and descriptor
+    return this.Descriptor?.m_SolidMinLengthMeters_PS || 0.002;
+  }
+
+  controlPointsChanged(startIndex) {
+    // TODO: implement geometry update for modified control points
+  }
+
+  onChangedFrameKnots(startIndex) {
+    // TODO: frame knots and detect strip breaks
+    return false;
+  }
+
+  onChangedMakeGeometry(startIndex) {
+    // TODO: generate mesh data for affected knots
+  }
+
+  resizeGeometry() {
+    // TODO: resize internal geometry buffers
+  }
+
+  onChangedStretchUVs(startIndex) {
+    // TODO: update UVs when stretch style is active
+  }
+
+  onChangedModifySilhouette(startIndex) {
+    // TODO: apply shape modifiers to the silhouette
+  }
+
   // Generate a tube mesh along control points without relying on Three.js helpers.
   createMesh() {
     const cpCount = this.controlPoints.length;
