@@ -3,7 +3,7 @@ import { ControlPoint } from './ControlPoint.js';
 import BrushCatalog from './BrushCatalog.js';
 import BrushDescriptor from './BrushDescriptor.js';
 import BrushManifest from './BrushManifest.js';
-import Pointer from './Pointer.js';
+import { Pointer } from './Pointer.js';
 import { Stroke } from './Stroke.js';
 import TubeBrush from './TubeBrush.js';
 
