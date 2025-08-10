@@ -3,6 +3,7 @@ import { TrTransform } from './TrTransform.js';
 import { ControlPoint } from './ControlPoint.js';
 import { TubeBrush } from './TubeBrush.js';
 import BrushCatalog from './BrushCatalog.js';
+import BrushDescriptor from './BrushDescriptor.js';
 
 export function createCircleStroke(scene) {
   const canvas = new Group();
@@ -30,8 +31,13 @@ export function createCircleStroke(scene) {
     controlPoints.push(cp);
   }
 
-  const catalog = BrushCatalog.createDefault();
-  const desc = catalog.getDescriptorByName('TubeBrush');
+  const tubeDesc = new BrushDescriptor();
+  tubeDesc.m_Guid = 'tube-brush';
+  tubeDesc.m_DurableName = 'TubeBrush';
+  tubeDesc.m_LocalizedDescription = 'Tube Brush';
+  const manifest = { Brushes: [tubeDesc], CompatibilityBrushes: [] };
+  BrushCatalog.Init(manifest);
+  const desc = BrushCatalog.GetBrush('tube-brush');
   const brush = new TubeBrush();
   brush.m_Color = new Color('blue');
   brush.BaseSize_PS = 0.05;

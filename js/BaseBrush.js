@@ -17,7 +17,7 @@ export class BaseBrush {
 
   static create(parent, xfInParentSpace, desc, color, size_PS) {
     const brush = new BaseBrush();
-    brush.group.name = desc?.description || desc?.durableName || 'BrushStroke';
+    brush.group.name = desc?.Description || desc?.m_DurableName || 'BrushStroke';
     if (parent && parent.add) {
       parent.add(brush.group);
     }
