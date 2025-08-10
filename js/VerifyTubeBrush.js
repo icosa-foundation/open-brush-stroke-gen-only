@@ -11,7 +11,8 @@ function buildCircleControlPoints(segments = 16, radius = 1.5) {
     const position = new Vector3(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
     const radial = new Vector3(Math.cos(angle), Math.sin(angle), 0);
     const tangent = new Vector3(-Math.sin(angle), Math.cos(angle), 0);
-    const matrix = new Matrix4().makeBasis(radial, new Vector3(0, 0, 1), tangent);
+    const binormal = new Vector3().crossVectors(tangent, radial).normalize();
+    const matrix = new Matrix4().makeBasis(radial, binormal, tangent);
     const rotation = new Quaternion().setFromRotationMatrix(matrix);
     cps.push(new ControlPoint(position, rotation, 1, i));
   }
