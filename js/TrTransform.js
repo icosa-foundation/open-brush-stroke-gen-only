@@ -1,4 +1,4 @@
-import { Vector3, Quaternion, Matrix4 } from 'three';
+import { Vector3, Quaternion, Matrix4, Plane } from 'three';
 import QuaternionExtensions from './QuaternionExtensions.js';
 
 /**
@@ -116,9 +116,23 @@ export class TrTransform {
     return v.clone().applyQuaternion(this.rotation);
   }
 
-  // TODO: implement plane transformation
   multiplyPlane(plane) {
-    throw new Error('multiplyPlane not implemented');
+    if (!(plane instanceof Plane)) {
+      throw new Error('multiplyPlane requires a three.js Plane');
+    }
+    // Transform plane assuming uniform scale
+    const normal = plane.normal
+      .clone()
+      .applyQuaternion(this.rotation)
+      .multiplyScalar(1 / this.scale);
+    let constant = plane.constant - normal.dot(this.translation);
+    // Ensure the plane normal remains normalized
+    const len = normal.length();
+    if (len > 0) {
+      normal.multiplyScalar(1 / len);
+      constant *= 1 / len;
+    }
+    return new Plane(normal, constant);
   }
 
   mul(b) {
