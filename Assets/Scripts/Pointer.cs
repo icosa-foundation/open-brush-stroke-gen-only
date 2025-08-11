@@ -238,7 +238,7 @@ namespace TiltBrush
 
             var cp0 = stroke.m_ControlPoints[0];
             var xf_CS = TrTransform.TRS(cp0.m_Pos, cp0.m_Orient, stroke.m_BrushScale);
-            var xf_RS = canvas.Pose * xf_CS;
+            var xf_RS = canvas.Core.Pose * xf_CS;
 
             // This transform used to be incorrect, but we didn't notice.
             // That implies this isn't necessary?
