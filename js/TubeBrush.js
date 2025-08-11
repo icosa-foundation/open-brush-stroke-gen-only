@@ -14,8 +14,10 @@ export class TubeBrush extends GeometryBrush {
   constructor() {
     super({ canBatch: true, upperBoundVertsPerKnot: 24, doubleSided: false });
     this.pointsInClosedCircle = 8;
+    // Cross-section shape (round by default)
+    this.crossSection = TubeBrush.CrossSection.ROUND;
+    // Shape modifier along the length of the stroke
     this.shapeModifier = TubeBrush.ShapeModifier.NONE;
-    this.silhouetteModifier = TubeBrush.SilhouetteModifier.NONE;
     this.taperScalar = 1.0;
   }
 
@@ -93,15 +95,15 @@ export class TubeBrush extends GeometryBrush {
       const cp = this.controlPoints[i];
       const t = i / (cpCount - 1);
       let radius = baseRadius;
-      if (this.silhouetteModifier === TubeBrush.SilhouetteModifier.TAPER) {
+      if (this.shapeModifier === TubeBrush.ShapeModifier.TAPER) {
         radius *= this.taperScalar * (1 - t);
       }
       for (let j = 0; j < radialSegments; j++) {
         const angle = (j / radialSegments) * Math.PI * 2;
         // Base circle coordinates.
         tmpPos.set(Math.cos(angle), Math.sin(angle), 0);
-        // Apply shape modification to cross-section coordinates.
-        if (this.shapeModifier === TubeBrush.ShapeModifier.SQUARE) {
+        // Apply cross-section modification to ring coordinates.
+        if (this.crossSection === TubeBrush.CrossSection.SQUARE) {
           const scale = 1 / Math.max(Math.abs(tmpPos.x), Math.abs(tmpPos.y));
           tmpPos.x *= scale;
           tmpPos.y *= scale;
@@ -142,12 +144,14 @@ export class TubeBrush extends GeometryBrush {
   }
 }
 
-TubeBrush.ShapeModifier = {
-  NONE: 'none',
+// Cross-section shapes
+TubeBrush.CrossSection = {
+  ROUND: 'round',
   SQUARE: 'square',
 };
 
-TubeBrush.SilhouetteModifier = {
+// Shape modifiers along the stroke length
+TubeBrush.ShapeModifier = {
   NONE: 'none',
   TAPER: 'taper',
 };

@@ -24,11 +24,11 @@ export class Pointer {
       this.currentBrush.m_Color.copy(stroke.color);
     }
     this.currentBrush.BaseSize_PS = stroke.brushSize || 0.01;
+    if (stroke.crossSection) {
+      this.currentBrush.crossSection = stroke.crossSection;
+    }
     if (stroke.shapeModifier) {
       this.currentBrush.shapeModifier = stroke.shapeModifier;
-    }
-    if (stroke.silhouetteModifier) {
-      this.currentBrush.silhouetteModifier = stroke.silhouetteModifier;
     }
     this.currentBrush.initBrush(desc, TrTransform.identity);
     this.currentStroke = stroke;

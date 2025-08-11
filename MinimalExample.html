@@ -36,16 +36,16 @@
     scene.add(dir);
 
     // Create four stroke variations: circle/open with round/square cross sections.
-    const circleRound = createCircleStroke(scene, TubeBrush.ShapeModifier.NONE);
+    const circleRound = createCircleStroke(scene, TubeBrush.CrossSection.ROUND);
     circleRound.canvas.position.set(-2, 0, 0);
 
-    const circleSquare = createCircleStroke(scene, TubeBrush.ShapeModifier.SQUARE);
+    const circleSquare = createCircleStroke(scene, TubeBrush.CrossSection.SQUARE);
     circleSquare.canvas.position.set(2, 0, 0);
 
-    const lineRound = createOpenStroke(scene, TubeBrush.ShapeModifier.NONE);
+    const lineRound = createOpenStroke(scene, TubeBrush.CrossSection.ROUND);
     lineRound.canvas.position.set(0, -2, 0);
 
-    const lineSquare = createOpenStroke(scene, TubeBrush.ShapeModifier.SQUARE);
+    const lineSquare = createOpenStroke(scene, TubeBrush.CrossSection.SQUARE);
     lineSquare.canvas.position.set(0, 2, 0);
 
     const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);

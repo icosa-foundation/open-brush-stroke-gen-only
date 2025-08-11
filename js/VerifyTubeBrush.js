@@ -112,11 +112,11 @@ function verifyTubeBrush() {
   console.log('TubeBrush geometry passed basic checks');
 }
 
-function verifySquareModifier() {
+function verifySquareCrossSection() {
   const cps = buildCircleControlPoints();
   const brush = new TubeBrush();
   brush.BaseSize_PS = 0.05;
-  brush.shapeModifier = TubeBrush.ShapeModifier.SQUARE;
+  brush.crossSection = TubeBrush.CrossSection.SQUARE;
   brush.initBrush({ m_Guid: 'tube-brush' }, TrTransform.identity);
   for (const cp of cps) {
     brush.addControlPoint(cp);
@@ -149,14 +149,14 @@ function verifySquareModifier() {
   if (maxError > 1e-3) {
     throw new Error('Square shape variance exceeds tolerance');
   }
-  console.log('TubeBrush square modifier passed basic checks');
+  console.log('TubeBrush square cross-section passed basic checks');
 }
 
-function verifyTaperModifier() {
+function verifyTaperShape() {
   const cps = buildLineControlPoints();
   const brush = new TubeBrush();
   brush.BaseSize_PS = 0.05;
-  brush.silhouetteModifier = TubeBrush.SilhouetteModifier.TAPER;
+  brush.shapeModifier = TubeBrush.ShapeModifier.TAPER;
   brush.initBrush({ m_Guid: 'tube-brush' }, TrTransform.identity);
   for (const cp of cps) {
     brush.addControlPoint(cp);
@@ -187,9 +187,9 @@ function verifyTaperModifier() {
   if (lastRadius > firstRadius * 0.25) {
     throw new Error('Taper modifier did not reduce radius sufficiently');
   }
-  console.log('TubeBrush taper modifier passed basic checks');
+  console.log('TubeBrush taper shape passed basic checks');
 }
 
 verifyTubeBrush();
-verifySquareModifier();
-verifyTaperModifier();
+verifySquareCrossSection();
+verifyTaperShape();

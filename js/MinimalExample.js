@@ -16,17 +16,17 @@ tubeDesc.m_BrushPrefab = TubeBrush;
 const manifest = BrushManifest.fromJSON({ Brushes: [tubeDesc], CompatibilityBrushes: [] });
 BrushCatalog.Init(manifest);
 
-function buildStroke(scene, controlPoints, shape, silhouette) {
+function buildStroke(scene, controlPoints, crossSection, shapeMod) {
   const canvas = new Group();
   scene.add(canvas);
 
   const stroke = new Stroke();
   stroke.controlPoints = controlPoints;
-  stroke.color = new Color(shape === TubeBrush.ShapeModifier.SQUARE ? 'red' : 'blue');
+  stroke.color = new Color(crossSection === TubeBrush.CrossSection.SQUARE ? 'red' : 'blue');
   stroke.brushGuid = 'tube-brush';
   stroke.brushSize = 0.05;
-  stroke.shapeModifier = shape;
-  stroke.silhouetteModifier = silhouette;
+  stroke.crossSection = crossSection;
+  stroke.shapeModifier = shapeMod;
 
   const pointer = new Pointer(canvas);
   pointer.recreateLineFromMemory(stroke);
@@ -38,8 +38,8 @@ function buildStroke(scene, controlPoints, shape, silhouette) {
 
 export function createCircleStroke(
   scene,
-  shape = TubeBrush.ShapeModifier.NONE,
-  silhouette = TubeBrush.SilhouetteModifier.NONE
+  crossSection = TubeBrush.CrossSection.ROUND,
+  shapeMod = TubeBrush.ShapeModifier.NONE
 ) {
   const controlPoints = [];
   const segments = 32;
@@ -59,13 +59,13 @@ export function createCircleStroke(
   const first = controlPoints[0];
   controlPoints.push(new ControlPoint(first.pos.clone(), first.orient.clone(), first.pressure, segments));
 
-  return buildStroke(scene, controlPoints, shape, silhouette);
+  return buildStroke(scene, controlPoints, crossSection, shapeMod);
 }
 
 export function createOpenStroke(
   scene,
-  shape = TubeBrush.ShapeModifier.NONE,
-  silhouette = TubeBrush.SilhouetteModifier.NONE
+  crossSection = TubeBrush.CrossSection.ROUND,
+  shapeMod = TubeBrush.ShapeModifier.NONE
 ) {
   const positions = [new Vector3(-1, 0, 0), new Vector3(1, 0, 0)];
   const radial = new Vector3(0, 1, 0);
@@ -75,5 +75,5 @@ export function createOpenStroke(
   const rotation = new Quaternion().setFromRotationMatrix(matrix);
 
   const controlPoints = positions.map((pos, idx) => new ControlPoint(pos, rotation.clone(), 1, idx));
-  return buildStroke(scene, controlPoints, shape, silhouette);
+  return buildStroke(scene, controlPoints, crossSection, shapeMod);
 }
