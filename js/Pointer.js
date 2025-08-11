@@ -24,6 +24,9 @@ export class Pointer {
       this.currentBrush.m_Color.copy(stroke.color);
     }
     this.currentBrush.BaseSize_PS = stroke.brushSize || 0.01;
+    if (stroke.shapeModifier) {
+      this.currentBrush.shapeModifier = stroke.shapeModifier;
+    }
     this.currentBrush.initBrush(desc, TrTransform.identity);
     this.currentStroke = stroke;
     this.currentStroke.controlPoints = this.currentStroke.controlPoints || [];

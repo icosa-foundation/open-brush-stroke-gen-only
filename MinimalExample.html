@@ -17,6 +17,10 @@
   </script>
 </head>
 <body>
+  <select id="shape">
+    <option value="none">Round</option>
+    <option value="square" selected>Square</option>
+  </select>
   <script type="module">
     import { Scene, PerspectiveCamera, WebGLRenderer } from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -27,7 +31,15 @@
     document.body.appendChild(renderer.domElement);
 
     const scene = new Scene();
-    createCircleStroke(scene);
+    const shapeSelect = document.getElementById('shape');
+    let current;
+
+    function rebuild() {
+      if (current) scene.remove(current.canvas);
+      current = createCircleStroke(scene, shapeSelect.value);
+    }
+    rebuild();
+    shapeSelect.addEventListener('change', rebuild);
 
     const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 5;

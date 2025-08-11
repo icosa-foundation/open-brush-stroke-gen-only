@@ -9,6 +9,7 @@ export class StrokeData {
       this.brushSize = existing.brushSize;
       this.brushScale = existing.brushScale;
       this.seed = existing.seed;
+      this.shapeModifier = existing.shapeModifier;
       this.controlPoints = existing.controlPoints.map(cp => new ControlPoint(
         cp.pos?.clone ? cp.pos.clone() : cp.pos,
         cp.orient?.clone ? cp.orient.clone() : cp.orient,
@@ -22,6 +23,7 @@ export class StrokeData {
       this.brushScale = 1;
       this.seed = 0;
       this.controlPoints = [];
+      this.shapeModifier = null;
     }
 
     const uuidFn = globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function'

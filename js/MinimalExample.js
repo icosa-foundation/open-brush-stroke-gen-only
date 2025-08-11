@@ -7,7 +7,7 @@ import { Pointer } from './Pointer.js';
 import { Stroke } from './Stroke.js';
 import TubeBrush from './TubeBrush.js';
 
-export function createCircleStroke(scene) {
+export function createCircleStroke(scene, shape = TubeBrush.ShapeModifier.NONE) {
   const canvas = new Group();
   scene.add(canvas);
 
@@ -37,6 +37,7 @@ export function createCircleStroke(scene) {
   stroke.color = new Color('blue');
   stroke.brushGuid = 'tube-brush';
   stroke.brushSize = 0.05;
+  stroke.shapeModifier = shape;
 
   const tubeDesc = new BrushDescriptor();
   tubeDesc.m_Guid = 'tube-brush';
