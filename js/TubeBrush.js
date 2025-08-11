@@ -20,6 +20,11 @@ export class TubeBrush extends GeometryBrush {
     this.shapeModifier = TubeBrush.ShapeModifier.NONE;
     // How UVs are generated along the stroke
     this.uvStyle = TubeBrush.UVStyle.DISTANCE;
+    // Specific to Taper modifier
+    this.taperScalar = 1.0;
+    // Specific to Petal modifier
+    this.petalDisplacementAmt = 0.5;
+    this.petalDisplacementExp = 3.0;
   }
 
   initBrush(desc, localPointerXf) {
@@ -126,10 +131,28 @@ export class TubeBrush extends GeometryBrush {
     for (let i = 0; i < cpCount; i++) {
       const cp = this.controlPoints[i];
       const t = i / (cpCount - 1);
-      let radius = baseRadius;
-      if (this.shapeModifier === TubeBrush.ShapeModifier.TAPER) {
-        radius *= 1 - t;
+      let curve = 1;
+      let offsetAmt = 0;
+      switch (this.shapeModifier) {
+        case TubeBrush.ShapeModifier.TAPER:
+          curve = this.taperScalar * (1 - t);
+          break;
+        case TubeBrush.ShapeModifier.SIN:
+          curve = Math.abs(Math.sin(t * Math.PI));
+          break;
+        case TubeBrush.ShapeModifier.COMET:
+          curve = Math.sin(t * 1.5 + 1.55);
+          break;
+        case TubeBrush.ShapeModifier.PETAL:
+          curve = Math.abs(Math.sin(t * Math.PI));
+          offsetAmt = Math.pow(t, this.petalDisplacementExp) *
+            this.petalDisplacementAmt * baseRadius * cp.pressure;
+          break;
+        case TubeBrush.ShapeModifier.DOUBLE_SIDED_TAPER:
+          // TODO: implement DoubleSidedTaper modifier
+          break;
       }
+      let radius = baseRadius * curve;
       right.set(1, 0, 0).applyQuaternion(cp.orient);
       up.set(0, 1, 0).applyQuaternion(cp.orient);
       const halfW = radius;
@@ -151,6 +174,9 @@ export class TubeBrush extends GeometryBrush {
           tmpNormal.set(Math.cos(angle), Math.sin(angle), 0);
           tmpPos.applyQuaternion(cp.orient).add(cp.pos);
           tmpNormal.applyQuaternion(cp.orient);
+        }
+        if (offsetAmt !== 0) {
+          tmpPos.addScaledVector(tmpNormal, offsetAmt);
         }
         positions.push(tmpPos.x, tmpPos.y, tmpPos.z);
         normals.push(tmpNormal.x, tmpNormal.y, tmpNormal.z);

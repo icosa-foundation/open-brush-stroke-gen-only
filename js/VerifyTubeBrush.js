@@ -197,6 +197,76 @@ function verifyTaperShape() {
   console.log('TubeBrush taper shape passed basic checks');
 }
 
+function verifySinShape() {
+  const cps = buildLineControlPoints();
+  const brush = new TubeBrush();
+  brush.BaseSize_PS = 0.05;
+  brush.shapeModifier = TubeBrush.ShapeModifier.SIN;
+  brush.initBrush({ m_Guid: 'tube-brush' }, TrTransform.identity);
+  for (const cp of cps) {
+    brush.addControlPoint(cp);
+  }
+  const mesh = brush.createMesh();
+  if (!mesh) {
+    throw new Error('TubeBrush returned null mesh for sin modifier');
+  }
+  const radialSegments = brush.pointsInClosedCircle;
+  const positions = mesh.geometry.getAttribute('position');
+  const pos = new Vector3();
+  const firstCenter = cps[0].pos;
+  const midCenter = cps[Math.floor(cps.length / 2)].pos;
+  let firstRadius = 0;
+  let midRadius = 0;
+  for (let j = 0; j < radialSegments; j++) {
+    pos.fromBufferAttribute(positions, j);
+    firstRadius += pos.distanceTo(firstCenter);
+    pos.fromBufferAttribute(positions, Math.floor(cps.length / 2) * radialSegments + j);
+    midRadius += pos.distanceTo(midCenter);
+  }
+  firstRadius /= radialSegments;
+  midRadius /= radialSegments;
+  const baseRadius = brush.BaseSize_LS || 0.01;
+  if (firstRadius > baseRadius * 0.25) {
+    throw new Error('Sin modifier did not reduce start radius');
+  }
+  if (midRadius < baseRadius * 0.9) {
+    throw new Error('Sin modifier did not produce full radius at mid stroke');
+  }
+  console.log('TubeBrush sin shape passed basic checks');
+}
+
+function verifyPetalShape() {
+  const cps = buildLineControlPoints();
+  const brush = new TubeBrush();
+  brush.BaseSize_PS = 0.05;
+  brush.shapeModifier = TubeBrush.ShapeModifier.PETAL;
+  brush.initBrush({ m_Guid: 'tube-brush' }, TrTransform.identity);
+  for (const cp of cps) {
+    brush.addControlPoint(cp);
+  }
+  const mesh = brush.createMesh();
+  if (!mesh) {
+    throw new Error('TubeBrush returned null mesh for petal modifier');
+  }
+  const radialSegments = brush.pointsInClosedCircle;
+  const positions = mesh.geometry.getAttribute('position');
+  const pos = new Vector3();
+  const midCenter = cps[Math.floor(cps.length / 2)].pos;
+  let midRadius = 0;
+  for (let j = 0; j < radialSegments; j++) {
+    pos.fromBufferAttribute(positions, Math.floor(cps.length / 2) * radialSegments + j);
+    midRadius += pos.distanceTo(midCenter);
+  }
+  midRadius /= radialSegments;
+  const baseRadius = brush.BaseSize_LS || 0.01;
+  if (midRadius <= baseRadius * 1.05) {
+    throw new Error('Petal modifier did not displace vertices outward');
+  }
+  console.log('TubeBrush petal shape passed basic checks');
+}
+
 verifyTubeBrush();
 verifySquareCrossSection();
 verifyTaperShape();
+verifySinShape();
+verifyPetalShape();

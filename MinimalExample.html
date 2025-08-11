@@ -43,10 +43,16 @@
     circleSquare.canvas.position.set(2, 0, 0);
 
     const lineRound = createOpenStroke(scene, TubeBrush.CrossSection.ROUND);
-    lineRound.canvas.position.set(0, -2, 0);
+    lineRound.canvas.position.set(-2, 2, 0);
 
     const lineTaper = createOpenStroke(scene, TubeBrush.CrossSection.ROUND, TubeBrush.ShapeModifier.TAPER);
-    lineTaper.canvas.position.set(0, 2, 0);
+    lineTaper.canvas.position.set(2, 2, 0);
+
+    const lineSin = createOpenStroke(scene, TubeBrush.CrossSection.ROUND, TubeBrush.ShapeModifier.SIN);
+    lineSin.canvas.position.set(-2, -2, 0);
+
+    const linePetal = createOpenStroke(scene, TubeBrush.CrossSection.ROUND, TubeBrush.ShapeModifier.PETAL);
+    linePetal.canvas.position.set(2, -2, 0);
 
     const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 5;
