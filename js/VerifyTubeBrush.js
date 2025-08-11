@@ -89,6 +89,26 @@ function verifyTubeBrush() {
   if (minNormalDot < 0.5) {
     throw new Error('Normals appear to be flipped or inaccurate');
   }
+
+  // Ensure triangle winding matches vertex normals by comparing face normals
+  // against the normal of the first vertex in each triangle.
+  const indexAttr = mesh.geometry.getIndex();
+  const indicesArr = indexAttr.array;
+  const v0 = new Vector3();
+  const v1 = new Vector3();
+  const v2 = new Vector3();
+  const n0 = new Vector3();
+  const tri = new Vector3();
+  for (let i = 0; i < indicesArr.length; i += 3) {
+    v0.fromBufferAttribute(positions, indicesArr[i]);
+    v1.fromBufferAttribute(positions, indicesArr[i + 1]);
+    v2.fromBufferAttribute(positions, indicesArr[i + 2]);
+    tri.subVectors(v1, v0).cross(v2.clone().sub(v0)).normalize();
+    n0.fromBufferAttribute(normalsAttr, indicesArr[i]);
+    if (tri.dot(n0) < 0.5) {
+      throw new Error('Triangle winding is inconsistent with vertex normals');
+    }
+  }
   console.log('TubeBrush geometry passed basic checks');
 }
 
