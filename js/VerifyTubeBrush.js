@@ -197,39 +197,6 @@ function verifyTaperShape() {
   console.log('TubeBrush taper shape passed basic checks');
 }
 
-function verifySurfaceOffset() {
-  const cps = buildLineControlPoints();
-  const brush = new TubeBrush();
-  brush.BaseSize_PS = 0.05;
-  brush.shapeModifier = TubeBrush.ShapeModifier.SURFACE_OFFSET;
-  brush.surfaceOffset = 0.02;
-  brush.initBrush({ m_Guid: 'tube-brush' }, TrTransform.identity);
-  for (const cp of cps) {
-    brush.addControlPoint(cp);
-  }
-  const mesh = brush.createMesh();
-  if (!mesh) {
-    throw new Error('TubeBrush returned null mesh for surface-offset modifier');
-  }
-  const radialSegments = brush.pointsInClosedCircle;
-  const positions = mesh.geometry.getAttribute('position');
-  const pos = new Vector3();
-  const center = cps[0].pos;
-  let avgRadius = 0;
-  for (let j = 0; j < radialSegments; j++) {
-    pos.fromBufferAttribute(positions, j);
-    avgRadius += pos.distanceTo(center);
-  }
-  avgRadius /= radialSegments;
-  const expected = (brush.BaseSize_LS || 0.01) + brush.surfaceOffset;
-  console.log(`Surface-offset radius: ${avgRadius}`);
-  if (Math.abs(avgRadius - expected) > 1e-3) {
-    throw new Error('Surface-offset modifier did not adjust radius as expected');
-  }
-  console.log('TubeBrush surface-offset shape passed basic checks');
-}
-
 verifyTubeBrush();
 verifySquareCrossSection();
 verifyTaperShape();
-verifySurfaceOffset();

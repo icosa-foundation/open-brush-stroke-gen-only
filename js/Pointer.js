@@ -30,9 +30,6 @@ export class Pointer {
     if (stroke.shapeModifier) {
       this.currentBrush.shapeModifier = stroke.shapeModifier;
     }
-    if (stroke.surfaceOffset !== undefined) {
-      this.currentBrush.surfaceOffset = stroke.surfaceOffset;
-    }
     this.currentBrush.initBrush(desc, TrTransform.identity);
     this.currentStroke = stroke;
     this.currentStroke.controlPoints = this.currentStroke.controlPoints || [];
