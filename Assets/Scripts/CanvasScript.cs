@@ -19,14 +19,12 @@ namespace TiltBrush
 
     public class CanvasScript : MonoBehaviour
     {
-        private Canvas m_Canvas;
+        public Canvas Core { get; private set; }
 
         void Awake()
         {
-            m_Canvas = new Canvas(transform);
+            Core = new Canvas(transform);
         }
-
-        public TrTransform Pose => m_Canvas.Pose;
     }
 
 } // namespace TiltBrush

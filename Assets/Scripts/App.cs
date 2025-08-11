@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace TiltBrush
 {
-    public class App : MonoBehaviour
+    public static class App
     {
         public const float METERS_TO_UNITS = AppCore.METERS_TO_UNITS;
         public const float UNITS_TO_METERS = AppCore.UNITS_TO_METERS;
