@@ -127,6 +127,8 @@ function verifySquareCrossSection() {
   }
   const radialSegments = brush.pointsInClosedCircle;
   const radius = brush.BaseSize_LS || 0.01;
+  const halfW = radius;
+  const halfH = radius * TubeBrush.kCrossSectionAspect;
   const positions = mesh.geometry.getAttribute('position');
   const pos = new Vector3();
 
@@ -139,9 +141,14 @@ function verifySquareCrossSection() {
     for (let j = 0; j < radialSegments; j++) {
       pos.fromBufferAttribute(positions, i * radialSegments + j);
       local.copy(pos).sub(center).applyQuaternion(inv);
-      const maxComponent = Math.max(Math.abs(local.x), Math.abs(local.y));
-      const error = Math.abs(maxComponent - radius);
-      if (error > maxError) maxError = error;
+      const xAbs = Math.abs(local.x);
+      const yAbs = Math.abs(local.y);
+      // ensure vertex lies on rectangle boundary within tolerance
+      const edgeError = Math.min(Math.abs(xAbs - halfW), Math.abs(yAbs - halfH));
+      if (edgeError > maxError) maxError = edgeError;
+      if (xAbs > halfW + 1e-3 || yAbs > halfH + 1e-3) {
+        throw new Error('Vertex outside expected square bounds');
+      }
     }
   }
 

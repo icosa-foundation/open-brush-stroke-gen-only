@@ -89,6 +89,30 @@ export class TubeBrush extends GeometryBrush {
 
     const tmpPos = new Vector3();
     const tmpNormal = new Vector3();
+    const right = new Vector3();
+    const up = new Vector3();
+
+    // Precomputed square cross-section coordinates and normals in local space
+    const squarePos = [
+      [1,  1],
+      [1,  0],
+      [1, -1],
+      [0, -1],
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+      [0,  1],
+    ];
+    const squareNorm = [
+      [1, 0],
+      [1, 0],
+      [1, 0],
+      [0, -1],
+      [-1, 0],
+      [-1, 0],
+      [-1, 0],
+      [0, 1],
+    ];
 
     for (let i = 0; i < cpCount; i++) {
       const cp = this.controlPoints[i];
@@ -97,20 +121,28 @@ export class TubeBrush extends GeometryBrush {
       if (this.shapeModifier === TubeBrush.ShapeModifier.TAPER) {
         radius *= 1 - t;
       }
+      right.set(1, 0, 0).applyQuaternion(cp.orient);
+      up.set(0, 1, 0).applyQuaternion(cp.orient);
+      const halfW = radius;
+      const halfH = radius * TubeBrush.kCrossSectionAspect;
+
       for (let j = 0; j < radialSegments; j++) {
-        const angle = (j / radialSegments) * Math.PI * 2;
-        // Base circle coordinates.
-        tmpPos.set(Math.cos(angle), Math.sin(angle), 0);
-        // Apply cross-section modification to ring coordinates.
         if (this.crossSection === TubeBrush.CrossSection.SQUARE) {
-          const scale = 1 / Math.max(Math.abs(tmpPos.x), Math.abs(tmpPos.y));
-          tmpPos.x *= scale;
-          tmpPos.y *= scale;
+          const sx = squarePos[j][0] * halfW;
+          const sy = squarePos[j][1] * halfH;
+          tmpPos.copy(cp.pos)
+            .addScaledVector(right, sx)
+            .addScaledVector(up, sy);
+          tmpNormal.copy(right).multiplyScalar(squareNorm[j][0])
+            .addScaledVector(up, squareNorm[j][1])
+            .normalize();
+        } else {
+          const angle = (j / radialSegments) * Math.PI * 2;
+          tmpPos.set(Math.cos(angle) * halfW, Math.sin(angle) * halfW, 0);
+          tmpNormal.set(Math.cos(angle), Math.sin(angle), 0);
+          tmpPos.applyQuaternion(cp.orient).add(cp.pos);
+          tmpNormal.applyQuaternion(cp.orient);
         }
-        tmpNormal.copy(tmpPos).normalize();
-        tmpPos.multiplyScalar(radius);
-        tmpNormal.applyQuaternion(cp.orient);
-        tmpPos.applyQuaternion(cp.orient).add(cp.pos);
         positions.push(tmpPos.x, tmpPos.y, tmpPos.z);
         normals.push(tmpNormal.x, tmpNormal.y, tmpNormal.z);
         uvs.push(j / radialSegments, i / (cpCount - 1));
@@ -154,5 +186,8 @@ TubeBrush.ShapeModifier = {
   NONE: 'none',
   TAPER: 'taper',
 };
+
+// Height/width ratio used by the square cross-section, mirroring the C# constant
+TubeBrush.kCrossSectionAspect = 0.375;
 
 export default TubeBrush;
