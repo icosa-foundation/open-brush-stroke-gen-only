@@ -11,8 +11,6 @@ export class StrokeData {
       this.seed = existing.seed;
       this.crossSection = existing.crossSection;
       this.shapeModifier = existing.shapeModifier;
-      this.surfaceOffset = existing.surfaceOffset;
-      this.taperScalar = existing.taperScalar;
       this.controlPoints = existing.controlPoints.map(cp => new ControlPoint(
         cp.pos?.clone ? cp.pos.clone() : cp.pos,
         cp.orient?.clone ? cp.orient.clone() : cp.orient,
@@ -28,8 +26,6 @@ export class StrokeData {
       this.controlPoints = [];
       this.crossSection = null;
       this.shapeModifier = null;
-      this.surfaceOffset = 0;
-      this.taperScalar = 1;
     }
 
     const uuidFn = globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function'
