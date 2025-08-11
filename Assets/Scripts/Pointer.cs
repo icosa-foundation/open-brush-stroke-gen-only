@@ -184,7 +184,7 @@ namespace TiltBrush
             // Maybe change the brush to a proxy brush.
             BrushDescriptor desc = overrideDesc != null ? overrideDesc : m_CurrentBrush;
 
-            m_CurrentLine = BaseBrushScript.Create(
+            m_CurrentLine = BaseBrush.Create(
                 canvas.transform, xf_CS,
                 desc, m_CurrentColor, m_CurrentBrushSize);
         }
