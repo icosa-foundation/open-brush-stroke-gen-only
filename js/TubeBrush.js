@@ -18,6 +18,8 @@ export class TubeBrush extends GeometryBrush {
     this.crossSection = TubeBrush.CrossSection.ROUND;
     // Shape modifier along the length of the stroke
     this.shapeModifier = TubeBrush.ShapeModifier.NONE;
+    // How UVs are generated along the stroke
+    this.uvStyle = TubeBrush.UVStyle.DISTANCE;
   }
 
   initBrush(desc, localPointerXf) {
@@ -92,6 +94,13 @@ export class TubeBrush extends GeometryBrush {
     const right = new Vector3();
     const up = new Vector3();
 
+    // Precompute cumulative lengths for distance-based UVs
+    const lengths = new Array(cpCount).fill(0);
+    for (let i = 1; i < cpCount; i++) {
+      lengths[i] = lengths[i - 1] + this.controlPoints[i].pos.distanceTo(this.controlPoints[i - 1].pos);
+    }
+    const totalLength = lengths[cpCount - 1];
+
     // Precomputed square cross-section coordinates and normals in local space
     const squarePos = [
       [1,  1],
@@ -145,7 +154,10 @@ export class TubeBrush extends GeometryBrush {
         }
         positions.push(tmpPos.x, tmpPos.y, tmpPos.z);
         normals.push(tmpNormal.x, tmpNormal.y, tmpNormal.z);
-        uvs.push(j / radialSegments, i / (cpCount - 1));
+        const v = (this.uvStyle === TubeBrush.UVStyle.STRETCH || totalLength === 0)
+          ? i / (cpCount - 1)
+          : lengths[i] / totalLength;
+        uvs.push(j / radialSegments, v);
       }
     }
 
@@ -184,7 +196,17 @@ TubeBrush.CrossSection = {
 // Shape modifiers along the stroke length
 TubeBrush.ShapeModifier = {
   NONE: 'none',
+  DOUBLE_SIDED_TAPER: 'doubleSidedTaper',
+  SIN: 'sin',
+  COMET: 'comet',
   TAPER: 'taper',
+  PETAL: 'petal',
+};
+
+// UV mapping styles
+TubeBrush.UVStyle = {
+  DISTANCE: 'distance',
+  STRETCH: 'stretch',
 };
 
 // Height/width ratio used by the square cross-section, mirroring the C# constant

@@ -1,7 +1,8 @@
 # Guidelines for Contributors
 
-- **Port, don't innovate**: Maintain feature parity with the original C# Tilt Brush implementation. Mirror its architecture and logic without introducing new features or redesigns.
-- **Three.js target**: All code should run in JavaScript with three.js; remove Unity-specific constructs as you port.
+ - **Port, don't innovate**: Maintain feature parity with the original C# Tilt Brush implementation. Mirror its architecture and logic without introducing new features or redesigns.
+ - **Match the public interface of the C#**: Classes and functions should expose the same parameters and methods as their C# counterparts; avoid adding options that don't exist in the source.
+ - **Three.js target**: All code should run in JavaScript with three.js; remove Unity-specific constructs as you port.
 - **Always update the demo**: Whenever functionality changes, update `MinimalExample.html` to visually demonstrate the new or modified feature. Include multiple stroke variations and sufficient lighting so normals can be inspected.
 - **Keep strokes verifiable**: Prefer open and closed strokes in examples to expose cross-sections and shape modifiers.
 - **Tests are mandatory**: After code changes, run:
