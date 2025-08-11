@@ -16,7 +16,7 @@ tubeDesc.m_BrushPrefab = TubeBrush;
 const manifest = BrushManifest.fromJSON({ Brushes: [tubeDesc], CompatibilityBrushes: [] });
 BrushCatalog.Init(manifest);
 
-function buildStroke(scene, controlPoints, crossSection, shapeMod) {
+function buildStroke(scene, controlPoints, crossSection, shapeMod, surfaceOffset = 0) {
   const canvas = new Group();
   scene.add(canvas);
 
@@ -27,6 +27,7 @@ function buildStroke(scene, controlPoints, crossSection, shapeMod) {
   stroke.brushSize = 0.05;
   stroke.crossSection = crossSection;
   stroke.shapeModifier = shapeMod;
+  stroke.surfaceOffset = surfaceOffset;
 
   const pointer = new Pointer(canvas);
   pointer.recreateLineFromMemory(stroke);
@@ -39,7 +40,8 @@ function buildStroke(scene, controlPoints, crossSection, shapeMod) {
 export function createCircleStroke(
   scene,
   crossSection = TubeBrush.CrossSection.ROUND,
-  shapeMod = TubeBrush.ShapeModifier.NONE
+  shapeMod = TubeBrush.ShapeModifier.NONE,
+  surfaceOffset = 0
 ) {
   const controlPoints = [];
   const segments = 32;
@@ -59,13 +61,14 @@ export function createCircleStroke(
   const first = controlPoints[0];
   controlPoints.push(new ControlPoint(first.pos.clone(), first.orient.clone(), first.pressure, segments));
 
-  return buildStroke(scene, controlPoints, crossSection, shapeMod);
+  return buildStroke(scene, controlPoints, crossSection, shapeMod, surfaceOffset);
 }
 
 export function createOpenStroke(
   scene,
   crossSection = TubeBrush.CrossSection.ROUND,
-  shapeMod = TubeBrush.ShapeModifier.NONE
+  shapeMod = TubeBrush.ShapeModifier.NONE,
+  surfaceOffset = 0
 ) {
   const positions = [new Vector3(-1, 0, 0), new Vector3(1, 0, 0)];
   const radial = new Vector3(0, 1, 0);
@@ -75,5 +78,5 @@ export function createOpenStroke(
   const rotation = new Quaternion().setFromRotationMatrix(matrix);
 
   const controlPoints = positions.map((pos, idx) => new ControlPoint(pos, rotation.clone(), 1, idx));
-  return buildStroke(scene, controlPoints, crossSection, shapeMod);
+  return buildStroke(scene, controlPoints, crossSection, shapeMod, surfaceOffset);
 }

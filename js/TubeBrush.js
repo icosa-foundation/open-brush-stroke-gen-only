@@ -18,6 +18,8 @@ export class TubeBrush extends GeometryBrush {
     this.crossSection = TubeBrush.CrossSection.ROUND;
     // Shape modifier along the length of the stroke
     this.shapeModifier = TubeBrush.ShapeModifier.NONE;
+    // Offset applied along vertex normals when using SURFACE_OFFSET
+    this.surfaceOffset = 0;
   }
 
   initBrush(desc, localPointerXf) {
@@ -143,6 +145,9 @@ export class TubeBrush extends GeometryBrush {
           tmpPos.applyQuaternion(cp.orient).add(cp.pos);
           tmpNormal.applyQuaternion(cp.orient);
         }
+        if (this.shapeModifier === TubeBrush.ShapeModifier.SURFACE_OFFSET) {
+          tmpPos.addScaledVector(tmpNormal, this.surfaceOffset);
+        }
         positions.push(tmpPos.x, tmpPos.y, tmpPos.z);
         normals.push(tmpNormal.x, tmpNormal.y, tmpNormal.z);
         uvs.push(j / radialSegments, i / (cpCount - 1));
@@ -185,6 +190,7 @@ TubeBrush.CrossSection = {
 TubeBrush.ShapeModifier = {
   NONE: 'none',
   TAPER: 'taper',
+  SURFACE_OFFSET: 'surface-offset',
 };
 
 // Height/width ratio used by the square cross-section, mirroring the C# constant
