@@ -124,8 +124,9 @@ export class TubeBrush extends GeometryBrush {
         const d = (i + 1) * radialSegments + (j + 1) % radialSegments;
 
         // Form two triangles for the quad between ring i and i+1 at segment j.
-        indices.push(a, b, d);
-        indices.push(a, d, c);
+        // Winding is chosen so face normals align with the generated vertex normals.
+        indices.push(a, d, b);
+        indices.push(a, c, d);
       }
     }
 

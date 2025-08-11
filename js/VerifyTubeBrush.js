@@ -51,7 +51,9 @@ function verifyTubeBrush() {
   const radialSegments = brush.pointsInClosedCircle;
   const radius = brush.BaseSize_LS || 0.01;
   const positions = mesh.geometry.getAttribute('position');
+  const normalsAttr = mesh.geometry.getAttribute('normal');
   const pos = new Vector3();
+  const normal = new Vector3();
 
   if (positions.count !== cps.length * radialSegments) {
     throw new Error(`Vertex count ${positions.count} does not match expected ${cps.length * radialSegments}`);
@@ -59,6 +61,7 @@ function verifyTubeBrush() {
 
   let maxError = 0;
   let minDistFromOrigin = Infinity;
+  let minNormalDot = 1;
   for (let i = 0; i < cps.length; i++) {
     const center = cps[i].pos;
     for (let j = 0; j < radialSegments; j++) {
@@ -68,6 +71,9 @@ function verifyTubeBrush() {
       if (error > maxError) maxError = error;
       const fromOrigin = pos.length();
       if (fromOrigin < minDistFromOrigin) minDistFromOrigin = fromOrigin;
+      normal.fromBufferAttribute(normalsAttr, i * radialSegments + j);
+      const outward = normal.dot(pos.clone().sub(center).normalize());
+      if (outward < minNormalDot) minNormalDot = outward;
     }
   }
 
@@ -79,6 +85,9 @@ function verifyTubeBrush() {
   }
   if (minDistFromOrigin < radius * 0.5) {
     throw new Error('Detected vertex too close to origin');
+  }
+  if (minNormalDot < 0.5) {
+    throw new Error('Normals appear to be flipped or inaccurate');
   }
   console.log('TubeBrush geometry passed basic checks');
 }
