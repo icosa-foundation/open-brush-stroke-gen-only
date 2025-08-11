@@ -18,42 +18,24 @@ namespace TiltBrush
 {
     public class PointerScript : MonoBehaviour
     {
+        // Serialized fields mirrored to the standalone Pointer implementation.
+        public bool DrawingEnabled;
+        public Color m_CurrentColor;
+        public BrushDescriptor m_CurrentBrush;
+        public float m_CurrentBrushSize;
+        public float m_CurrentPressure;
+
         private readonly Pointer m_Pointer = new Pointer();
 
-        public bool DrawingEnabled
-        {
-            get => m_Pointer.DrawingEnabled;
-            set => m_Pointer.DrawingEnabled = value;
-        }
-
+        private CanvasScript m_Canvas;
         public CanvasScript Canvas
         {
-            get => m_Pointer.Canvas;
-            set => m_Pointer.Canvas = value;
-        }
-
-        public Color m_CurrentColor
-        {
-            get => m_Pointer.m_CurrentColor;
-            set => m_Pointer.m_CurrentColor = value;
-        }
-
-        public BrushDescriptor m_CurrentBrush
-        {
-            get => m_Pointer.m_CurrentBrush;
-            set => m_Pointer.m_CurrentBrush = value;
-        }
-
-        public float m_CurrentBrushSize
-        {
-            get => m_Pointer.m_CurrentBrushSize;
-            set => m_Pointer.m_CurrentBrushSize = value;
-        }
-
-        public float m_CurrentPressure
-        {
-            get => m_Pointer.m_CurrentPressure;
-            set => m_Pointer.m_CurrentPressure = value;
+            get => m_Canvas;
+            set
+            {
+                m_Canvas = value;
+                m_Pointer.Canvas = value;
+            }
         }
 
         public float BrushSize01
@@ -71,56 +53,91 @@ namespace TiltBrush
         void Awake()
         {
             m_Pointer.Initialize();
+            SyncFieldsToPointer();
+            SyncFieldsFromPointer();
         }
 
         void Update()
         {
+            SyncFieldsToPointer();
             m_Pointer.Tick(transform);
+            SyncFieldsFromPointer();
+        }
+
+        void SyncFieldsToPointer()
+        {
+            m_Pointer.DrawingEnabled = DrawingEnabled;
+            m_Pointer.Canvas = m_Canvas;
+            m_Pointer.m_CurrentColor = m_CurrentColor;
+            m_Pointer.m_CurrentBrush = m_CurrentBrush;
+            m_Pointer.m_CurrentBrushSize = m_CurrentBrushSize;
+            m_Pointer.m_CurrentPressure = m_CurrentPressure;
+        }
+
+        void SyncFieldsFromPointer()
+        {
+            DrawingEnabled = m_Pointer.DrawingEnabled;
+            m_Canvas = m_Pointer.Canvas;
+            m_CurrentColor = m_Pointer.m_CurrentColor;
+            m_CurrentBrush = m_Pointer.m_CurrentBrush;
+            m_CurrentBrushSize = m_Pointer.m_CurrentBrushSize;
+            m_CurrentPressure = m_Pointer.m_CurrentPressure;
         }
 
         public void UpdateLineFromObject()
         {
             m_Pointer.UpdateLineFromObject(transform);
+            SyncFieldsFromPointer();
         }
 
         public void UpdateLineFromControlPoint(ControlPoint cp)
         {
             m_Pointer.UpdateLineFromControlPoint(cp);
+            SyncFieldsFromPointer();
         }
 
         public void UpdateLineFromStroke(Stroke stroke)
         {
             m_Pointer.UpdateLineFromStroke(stroke);
+            SyncFieldsFromPointer();
         }
 
         public void UpdateLineVisuals()
         {
             m_Pointer.UpdateLineVisuals();
+            SyncFieldsFromPointer();
         }
 
         public void CreateNewLine(CanvasScript canvas, TrTransform xf_CS, BrushDescriptor overrideDesc = null)
         {
             m_Pointer.CreateNewLine(canvas, xf_CS, overrideDesc);
+            SyncFieldsFromPointer();
         }
 
         public void SetControlPoint(TrTransform lastSpawnXf_LS, bool isKeeper)
         {
             m_Pointer.SetControlPoint(lastSpawnXf_LS, isKeeper);
+            SyncFieldsFromPointer();
         }
 
         public void DetachLine(bool bDiscard)
         {
             m_Pointer.DetachLine(bDiscard);
+            SyncFieldsFromPointer();
         }
 
         public void RecreateLineFromMemory(Stroke stroke)
         {
             m_Pointer.RecreateLineFromMemory(stroke, transform);
+            SyncFieldsFromPointer();
         }
 
         public GameObject BeginLineFromMemory(Stroke stroke, CanvasScript canvas)
         {
-            return m_Pointer.BeginLineFromMemory(stroke, canvas, transform);
+            var go = m_Pointer.BeginLineFromMemory(stroke, canvas, transform);
+            SyncFieldsFromPointer();
+            return go;
         }
     }
 }
+
