@@ -14,6 +14,7 @@ export class TubeBrush extends GeometryBrush {
   constructor() {
     super({ canBatch: true, upperBoundVertsPerKnot: 24, doubleSided: false });
     this.pointsInClosedCircle = 8;
+    this.shapeModifier = TubeBrush.ShapeModifier.NONE;
   }
 
   initBrush(desc, localPointerXf) {
@@ -90,8 +91,16 @@ export class TubeBrush extends GeometryBrush {
       const cp = this.controlPoints[i];
       for (let j = 0; j < radialSegments; j++) {
         const angle = (j / radialSegments) * Math.PI * 2;
-        tmpPos.set(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
+        // Base circle coordinates.
+        tmpPos.set(Math.cos(angle), Math.sin(angle), 0);
+        // Apply shape modification to cross-section coordinates.
+        if (this.shapeModifier === TubeBrush.ShapeModifier.SQUARE) {
+          const scale = 1 / Math.max(Math.abs(tmpPos.x), Math.abs(tmpPos.y));
+          tmpPos.x *= scale;
+          tmpPos.y *= scale;
+        }
         tmpNormal.copy(tmpPos).normalize();
+        tmpPos.multiplyScalar(radius);
         tmpPos.applyQuaternion(cp.orient).add(cp.pos);
         tmpNormal.applyQuaternion(cp.orient);
         positions.push(tmpPos.x, tmpPos.y, tmpPos.z);
@@ -124,5 +133,10 @@ export class TubeBrush extends GeometryBrush {
     return new Mesh(geometry, material);
   }
 }
+
+TubeBrush.ShapeModifier = {
+  NONE: 'none',
+  SQUARE: 'square',
+};
 
 export default TubeBrush;

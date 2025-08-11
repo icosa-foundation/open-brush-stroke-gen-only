@@ -69,4 +69,45 @@ function verifyTubeBrush() {
   console.log('TubeBrush geometry passed basic checks');
 }
 
+function verifySquareModifier() {
+  const cps = buildCircleControlPoints();
+  const brush = new TubeBrush();
+  brush.BaseSize_PS = 0.05;
+  brush.shapeModifier = TubeBrush.ShapeModifier.SQUARE;
+  brush.initBrush({ m_Guid: 'tube-brush' }, TrTransform.identity);
+  for (const cp of cps) {
+    brush.addControlPoint(cp);
+  }
+  const mesh = brush.createMesh();
+  if (!mesh) {
+    throw new Error('TubeBrush returned null mesh for square shape');
+  }
+  const radialSegments = brush.pointsInClosedCircle;
+  const radius = brush.BaseSize_LS || 0.01;
+  const positions = mesh.geometry.getAttribute('position');
+  const pos = new Vector3();
+
+  const local = new Vector3();
+  const inv = new Quaternion();
+  let maxError = 0;
+  for (let i = 0; i < cps.length; i++) {
+    const center = cps[i].pos;
+    inv.copy(cps[i].orient).invert();
+    for (let j = 0; j < radialSegments; j++) {
+      pos.fromBufferAttribute(positions, i * radialSegments + j);
+      local.copy(pos).sub(center).applyQuaternion(inv);
+      const maxComponent = Math.max(Math.abs(local.x), Math.abs(local.y));
+      const error = Math.abs(maxComponent - radius);
+      if (error > maxError) maxError = error;
+    }
+  }
+
+  console.log(`Max square error: ${maxError}`);
+  if (maxError > 1e-3) {
+    throw new Error('Square shape variance exceeds tolerance');
+  }
+  console.log('TubeBrush square modifier passed basic checks');
+}
+
 verifyTubeBrush();
+verifySquareModifier();
