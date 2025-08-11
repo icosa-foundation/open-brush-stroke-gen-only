@@ -54,6 +54,13 @@
     const linePetal = createOpenStroke(scene, TubeBrush.CrossSection.ROUND, TubeBrush.ShapeModifier.PETAL);
     linePetal.canvas.position.set(2, -2, 0);
 
+    const lineDouble = createOpenStroke(
+      scene,
+      TubeBrush.CrossSection.ROUND,
+      TubeBrush.ShapeModifier.DOUBLE_SIDED_TAPER
+    );
+    lineDouble.canvas.position.set(0, -2, 0);
+
     const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 5;
 

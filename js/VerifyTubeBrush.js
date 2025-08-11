@@ -265,8 +265,55 @@ function verifyPetalShape() {
   console.log('TubeBrush petal shape passed basic checks');
 }
 
+function verifyDoubleSidedTaperShape() {
+  const cps = buildLineControlPoints();
+  const brush = new TubeBrush();
+  brush.BaseSize_PS = 0.05;
+  brush.shapeModifier = TubeBrush.ShapeModifier.DOUBLE_SIDED_TAPER;
+  brush.initBrush({ m_Guid: 'tube-brush' }, TrTransform.identity);
+  for (const cp of cps) {
+    brush.addControlPoint(cp);
+  }
+  const mesh = brush.createMesh();
+  if (!mesh) {
+    throw new Error('TubeBrush returned null mesh for double-sided taper modifier');
+  }
+  const radialSegments = brush.pointsInClosedCircle;
+  const positions = mesh.geometry.getAttribute('position');
+  const pos = new Vector3();
+  const firstCenter = cps[0].pos;
+  const midCenter = cps[Math.floor(cps.length / 2)].pos;
+  const lastCenter = cps[cps.length - 1].pos;
+  let firstRadius = 0;
+  let midRadius = 0;
+  let lastRadius = 0;
+  for (let j = 0; j < radialSegments; j++) {
+    pos.fromBufferAttribute(positions, j);
+    firstRadius += pos.distanceTo(firstCenter);
+    pos.fromBufferAttribute(positions, Math.floor(cps.length / 2) * radialSegments + j);
+    midRadius += pos.distanceTo(midCenter);
+    pos.fromBufferAttribute(positions, (cps.length - 1) * radialSegments + j);
+    lastRadius += pos.distanceTo(lastCenter);
+  }
+  firstRadius /= radialSegments;
+  midRadius /= radialSegments;
+  lastRadius /= radialSegments;
+  const baseRadius = brush.BaseSize_LS || 0.01;
+  if (firstRadius > baseRadius * 0.25) {
+    throw new Error('Double-sided taper did not start with small radius');
+  }
+  if (midRadius < baseRadius * 0.5) {
+    throw new Error('Double-sided taper did not widen at mid stroke');
+  }
+  if (lastRadius > baseRadius * 0.25) {
+    throw new Error('Double-sided taper did not end with small radius');
+  }
+  console.log('TubeBrush double-sided taper shape passed basic checks');
+}
+
 verifyTubeBrush();
 verifySquareCrossSection();
 verifyTaperShape();
 verifySinShape();
 verifyPetalShape();
+verifyDoubleSidedTaperShape();

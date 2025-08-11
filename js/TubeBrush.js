@@ -149,7 +149,9 @@ export class TubeBrush extends GeometryBrush {
             this.petalDisplacementAmt * baseRadius * cp.pressure;
           break;
         case TubeBrush.ShapeModifier.DOUBLE_SIDED_TAPER:
-          // TODO: implement DoubleSidedTaper modifier
+          // Radius grows from both ends toward the middle and then tapers
+          // back down, forming a symmetrical pointy shape.
+          curve = 1 - Math.abs(2 * t - 1);
           break;
       }
       let radius = baseRadius * curve;
