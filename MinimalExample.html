@@ -35,18 +35,23 @@
     dir.position.set(5, 5, 5);
     scene.add(dir);
 
-    // Create four stroke variations: circle/open with round/square cross sections.
+    // Create strokes to showcase cross-sections and shape modifiers.
     const circleRound = createCircleStroke(scene, TubeBrush.CrossSection.ROUND);
     circleRound.canvas.position.set(-2, 0, 0);
 
     const circleSquare = createCircleStroke(scene, TubeBrush.CrossSection.SQUARE);
     circleSquare.canvas.position.set(2, 0, 0);
 
-    const lineRound = createOpenStroke(scene, TubeBrush.CrossSection.ROUND);
-    lineRound.canvas.position.set(0, -2, 0);
+    const lineTaper = createOpenStroke(scene, TubeBrush.CrossSection.ROUND, TubeBrush.ShapeModifier.TAPER);
+    lineTaper.canvas.position.set(0, -2, 0);
 
-    const lineSquare = createOpenStroke(scene, TubeBrush.CrossSection.SQUARE);
-    lineSquare.canvas.position.set(0, 2, 0);
+    const lineOffset = createOpenStroke(
+      scene,
+      TubeBrush.CrossSection.ROUND,
+      TubeBrush.ShapeModifier.SURFACE_OFFSET,
+      0.02
+    );
+    lineOffset.canvas.position.set(0, 2, 0);
 
     const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 5;

@@ -19,6 +19,7 @@ export class TubeBrush extends GeometryBrush {
     // Shape modifier along the length of the stroke
     this.shapeModifier = TubeBrush.ShapeModifier.NONE;
     this.taperScalar = 1.0;
+    this.surfaceOffset = 0;
   }
 
   initBrush(desc, localPointerXf) {
@@ -110,8 +111,11 @@ export class TubeBrush extends GeometryBrush {
         }
         tmpNormal.copy(tmpPos).normalize();
         tmpPos.multiplyScalar(radius);
-        tmpPos.applyQuaternion(cp.orient).add(cp.pos);
         tmpNormal.applyQuaternion(cp.orient);
+        tmpPos.applyQuaternion(cp.orient).add(cp.pos);
+        if (this.shapeModifier === TubeBrush.ShapeModifier.SURFACE_OFFSET) {
+          tmpPos.addScaledVector(tmpNormal, this.surfaceOffset);
+        }
         positions.push(tmpPos.x, tmpPos.y, tmpPos.z);
         normals.push(tmpNormal.x, tmpNormal.y, tmpNormal.z);
         uvs.push(j / radialSegments, i / (cpCount - 1));
@@ -154,6 +158,7 @@ TubeBrush.CrossSection = {
 TubeBrush.ShapeModifier = {
   NONE: 'none',
   TAPER: 'taper',
+  SURFACE_OFFSET: 'surface_offset',
 };
 
 export default TubeBrush;
