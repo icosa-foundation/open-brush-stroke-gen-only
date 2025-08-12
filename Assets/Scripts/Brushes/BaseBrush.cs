@@ -9,27 +9,6 @@ namespace TiltBrush
     public static class BaseBrush
     {
         /// <summary>
-        /// Instantiate a brush prefab and initialize the resulting script.
-        /// </summary>
-        public static BaseBrushScript Create(
-            Transform parent,
-            TrTransform xfInParentSpace,
-            BrushDescriptor desc,
-            Color color,
-            float size_PS)
-        {
-            GameObject line = Object.Instantiate(desc.m_BrushPrefab);
-            line.transform.SetParent(parent);
-            Coords.AsLocal[line.transform] = TrTransform.identity;
-            line.name = desc.Description;
-
-            BaseBrushScript currentLine = line.GetComponent<BaseBrushScript>();
-            currentLine.SetCreationState(color, size_PS);
-            currentLine.InitializeCore(desc, xfInParentSpace);
-            return currentLine;
-        }
-
-        /// <summary>
         /// Clone the given brush GameObject for use in undo operations.
         /// The clone is parented like the source and activated.
         /// A callback allows callers to perform additional initialization.

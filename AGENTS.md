@@ -4,7 +4,7 @@
 - Move functionality out of Unity `MonoBehaviour` classes into plain C# classes.
 - Keep `MonoBehaviour` scripts as small wrappers that forward calls to the standalone classes.
 - Place new C# source files in `Assets/Scripts` and ensure namespaces remain `TiltBrush`.
-- A standalone `.NET` build is not yet configured, so no build step is required.
+- When adding files or modifying code, run `dotnet build` from the repository root.
 
 ## Unity Independence Plan
 1. **Consolidate core logic** – ensure all features live in non-`MonoBehaviour` classes with stubs limited to serialization and event forwarding.
@@ -15,6 +15,6 @@
 
 
 ## Progress
-- Moved brush creation and undo cloning logic into standalone `BaseBrush` helper, further shrinking `BaseBrushScript`.
+- Moved brush undo cloning logic into standalone `BaseBrush` helper, further shrinking `BaseBrushScript`.
 - Extracted example scene behavior into `MinimalExampleCore` with `MinimalExample` as a stub.
 - TODO: migrate remaining brush behaviors into non-`MonoBehaviour` classes.

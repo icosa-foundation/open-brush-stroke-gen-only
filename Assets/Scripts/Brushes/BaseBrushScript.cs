@@ -63,7 +63,25 @@ namespace TiltBrush
         public const float kPreviewDuration = 0.2f; // Must be > 0 for the particles shader to work.
 
         /// Creates and properly initializes a new line.
-        /// Now handled by <see cref="BaseBrush.Create"/>.
+        /// Pass the initial transform in parent-local (Canvas) space.
+        /// Pass the size in pointer (Room) space.
+        public static BaseBrushScript Create(
+            Transform parent,
+            TrTransform xfInParentSpace,
+            BrushDescriptor desc, Color color, float size_PS)
+        {
+            GameObject line = Instantiate(desc.m_BrushPrefab);
+            line.transform.SetParent(parent);
+            Coords.AsLocal[line.transform] = TrTransform.identity;
+            line.name = desc.Description;
+
+            BaseBrushScript currentLine = line.GetComponent<BaseBrushScript>();
+            // TODO: pass this into InitBrush and do it there
+            currentLine.m_Color = color;
+            currentLine.m_BaseSize_PS = size_PS;
+            currentLine.InitBrush(desc, xfInParentSpace);
+            return currentLine;
+        }
         #endregion
 
         readonly public bool m_bCanBatch;
@@ -86,17 +104,6 @@ namespace TiltBrush
         protected BaseBrushScript(bool bCanBatch)
         {
             m_bCanBatch = bCanBatch;
-        }
-
-        internal void SetCreationState(Color color, float size_PS)
-        {
-            m_Color = color;
-            m_BaseSize_PS = size_PS;
-        }
-
-        internal void InitializeCore(BrushDescriptor desc, TrTransform localPointerXf)
-        {
-            InitBrush(desc, localPointerXf);
         }
 
         #region Accessors
