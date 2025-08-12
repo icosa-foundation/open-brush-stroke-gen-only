@@ -184,9 +184,14 @@ namespace TiltBrush
             // Maybe change the brush to a proxy brush.
             BrushDescriptor desc = overrideDesc != null ? overrideDesc : m_CurrentBrush;
 
-            m_CurrentLine = global::TiltBrush.BaseBrush.Create(
-                canvas.Transform, xf_CS,
-                desc, m_CurrentColor, m_CurrentBrushSize);
+            GameObject line = Object.Instantiate(desc.m_BrushPrefab);
+            line.transform.SetParent(canvas.Transform);
+            Coords.AsLocal[line.transform] = TrTransform.identity;
+            line.name = desc.Description;
+
+            m_CurrentLine = line.GetComponent<BaseBrushScript>();
+            m_CurrentLine.SetCreationState(m_CurrentColor, m_CurrentBrushSize);
+            m_CurrentLine.InitializeCore(desc, xf_CS);
         }
 
         /// Like BeginLineFromMemory + EndLineFromMemory

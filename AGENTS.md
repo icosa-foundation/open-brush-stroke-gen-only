@@ -15,10 +15,8 @@
 
 
 ## Progress
-- Moved brush creation and undo cloning logic into standalone `BaseBrush` helper, further shrinking `BaseBrushScript`.
+- Restored brush creation and undo cloning logic to `BaseBrushScript`, removing the misplaced `BaseBrush` helper to keep brush cores Unity-independent.
 - Extracted example scene behavior into `MinimalExampleCore` with `MinimalExample` as a stub.
 - Updated pointer and stroke core classes to depend on the standalone `Canvas` instead of `CanvasScript`, keeping MonoBehaviour stubs minimal.
-- Fixed `BaseBrush` helper references to use the local namespace, resolving compile errors after the helper's introduction.
-- Qualified calls to the `BaseBrush` helper with the global namespace to resolve missing-type compile errors.
 - Adjusted `BaseBrushScript` to expose the `Canvas` core directly and updated stroke logic to remove `Canvas.Core` references.
 - TODO: migrate remaining brush behaviors into non-`MonoBehaviour` classes.

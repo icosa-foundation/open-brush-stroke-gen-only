@@ -63,7 +63,23 @@ namespace TiltBrush
         public const float kPreviewDuration = 0.2f; // Must be > 0 for the particles shader to work.
 
         /// Creates and properly initializes a new line.
-        /// Now handled by <see cref="BaseBrush.Create"/>.
+        /// Pass the initial transform in parent-local (Canvas) space.
+        /// Pass the size in pointer (Room) space.
+        public static BaseBrushScript Create(
+            Transform parent,
+            TrTransform xfInParentSpace,
+            BrushDescriptor desc, Color color, float size_PS)
+        {
+            GameObject line = Instantiate(desc.m_BrushPrefab);
+            line.transform.SetParent(parent);
+            Coords.AsLocal[line.transform] = TrTransform.identity;
+            line.name = desc.Description;
+
+            BaseBrushScript currentLine = line.GetComponent<BaseBrushScript>();
+            currentLine.SetCreationState(color, size_PS);
+            currentLine.InitializeCore(desc, xfInParentSpace);
+            return currentLine;
+        }
         #endregion
 
         readonly public bool m_bCanBatch;
@@ -153,7 +169,14 @@ namespace TiltBrush
         /// Returns an object that implements the Undo animation
         public GameObject CloneAsUndoObject()
         {
-            return global::TiltBrush.BaseBrush.CloneAsUndoObject(gameObject, InitUndoClone);
+            GameObject clone = Instantiate(gameObject);
+            clone.name = "Undo " + clone.name;
+            clone.transform.parent = gameObject.transform.parent;
+            Coords.AsLocal[clone.transform] = Coords.AsLocal[gameObject.transform];
+            clone.SetActive(true);
+            Destroy(clone.GetComponent<BaseBrushScript>());
+            InitUndoClone(clone);
+            return clone;
         }
 
         /// Returns true if permanent geometry was generated.
