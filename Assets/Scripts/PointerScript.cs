@@ -45,7 +45,7 @@ namespace TiltBrush
         void SyncToCore()
         {
             Core.DrawingEnabled = DrawingEnabled;
-            Core.Canvas = Canvas;
+            Core.Canvas = Canvas != null ? Canvas.Core : null;
             Core.m_CurrentColor = m_CurrentColor;
             Core.m_CurrentBrush = m_CurrentBrush;
             Core.m_CurrentBrushSize = m_CurrentBrushSize;
@@ -55,7 +55,7 @@ namespace TiltBrush
         void SyncFromCore()
         {
             DrawingEnabled = Core.DrawingEnabled;
-            Canvas = Core.Canvas;
+            // Canvas is a serialized reference; the core holds only the Canvas core.
             m_CurrentColor = Core.m_CurrentColor;
             m_CurrentBrush = Core.m_CurrentBrush;
             m_CurrentBrushSize = Core.m_CurrentBrushSize;

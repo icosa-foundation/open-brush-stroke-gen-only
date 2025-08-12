@@ -12,5 +12,7 @@ namespace TiltBrush
         }
 
         public TrTransform Pose => Coords.AsGlobal[m_Transform];
+
+        public Transform Transform => m_Transform;
     }
 }
