@@ -16,5 +16,4 @@
 
 ## Progress
 - Moved brush undo cloning logic into standalone `BaseBrush` helper, further shrinking `BaseBrushScript`.
-- Extracted example scene behavior into `MinimalExampleCore` with `MinimalExample` as a stub.
 - TODO: migrate remaining brush behaviors into non-`MonoBehaviour` classes.
