@@ -39,7 +39,7 @@ namespace TiltBrush
         /// How the geometry is contained (if there is any)
         public Type m_Type = Type.NotCreated;
         /// Valid only when type == NotCreated. May be null.
-        public Canvas m_IntendedCanvas;
+        public CanvasScript m_IntendedCanvas;
         /// Valid only when type == BrushStroke. Never null; will always have a BaseBrushScript.
         public GameObject m_Object;
 
@@ -51,7 +51,7 @@ namespace TiltBrush
         public bool[] m_ControlPointsToDrop;
 
         /// The canvas this stroke is a part of.
-        public Canvas Canvas
+        public CanvasScript Canvas
         {
             get
             {
@@ -63,7 +63,7 @@ namespace TiltBrush
                 {
                     // Null checking is needed because sketches that fail to load
                     // can create invalid strokes that with no script.
-                    return m_Object?.GetComponent<BaseBrushScript>()?.Canvas.Core;
+                    return m_Object?.GetComponent<BaseBrushScript>()?.Canvas;
                 }
                 else
                 {
@@ -128,7 +128,7 @@ namespace TiltBrush
         ///
         /// TODO: Consider moving the code from the "m_Type == StrokeType.BrushStroke"
         /// case of SetParentKeepWorldPosition() into here.
-        public void Recreate(Pointer pointer, TrTransform? leftTransform = null, Canvas canvas = null, bool absoluteScale = false, Transform pointerTransform = null)
+        public void Recreate(PointerScript pointer, TrTransform? leftTransform = null, CanvasScript canvas = null, bool absoluteScale = false)
         {
             // TODO: Try a fast-path that uses VertexLayout+GeometryPool to modify geo directly
             if (leftTransform != null || m_Type == Type.NotCreated)
@@ -144,7 +144,7 @@ namespace TiltBrush
                     LeftTransformControlPoints(leftTransform.Value, absoluteScale);
                 }
 
-                pointer.RecreateLineFromMemory(this, pointerTransform);
+                pointer.Core.RecreateLineFromMemory(this, pointer.transform);
             }
             else if (canvas != null)
             {
@@ -199,10 +199,10 @@ namespace TiltBrush
         /// transforms.
         ///
         /// Directly analagous to Transform.SetParent, except strokes may not
-        /// be parented to an arbitrary Transform, only to Canvas.
-        public void SetParent(Canvas canvas)
+        /// be parented to an arbitrary Transform, only to CanvasScript.
+        public void SetParent(CanvasScript canvas)
         {
-            Canvas prevCanvas = Canvas;
+            CanvasScript prevCanvas = Canvas;
             if (prevCanvas == canvas)
             {
                 return;
@@ -212,7 +212,7 @@ namespace TiltBrush
             {
                 case Type.BrushStroke:
                     {
-                        m_Object.transform.SetParent(canvas.Transform, false);
+                        m_Object.transform.SetParent(canvas.transform, false);
                         break;
                     }
                 case Type.NotCreated:
@@ -231,10 +231,10 @@ namespace TiltBrush
         /// some other way.
         ///
         /// Directly analagous to Transform.SetParent, except strokes may not
-        /// be parented to an arbitrary Transform, only to Canvas.
-        public void SetParentKeepWorldPosition(Canvas canvas, Pointer pointer, TrTransform? leftTransform = null, Transform pointerTransform = null)
+        /// be parented to an arbitrary Transform, only to CanvasScript.
+        public void SetParentKeepWorldPosition(CanvasScript canvas, PointerScript pointer, TrTransform? leftTransform = null)
         {
-            Canvas prevCanvas = Canvas;
+            CanvasScript prevCanvas = Canvas;
             if (prevCanvas == canvas)
             {
                 return;
@@ -244,9 +244,9 @@ namespace TiltBrush
             //   newCanvas.Core.Pose * newCP = prevCanvas.Core.Pose * prevCP
             // Solve for newCp:
             //   newCP = (newCanvas.Core.Pose.inverse * prevCanvas.Core.Pose) * prevCP
-            TrTransform leftTransformValue = leftTransform ?? canvas.Pose.inverse * prevCanvas.Pose;
+            TrTransform leftTransformValue = leftTransform ?? canvas.Core.Pose.inverse * prevCanvas.Core.Pose;
             bool bWasTransformed = leftTransform.HasValue &&
-                !TrTransform.Approximately(prevCanvas.Pose, leftTransform.Value);
+                !TrTransform.Approximately(prevCanvas.Core.Pose, leftTransform.Value);
             if (m_Type == Type.NotCreated || !bWasTransformed)
             {
                 SetParent(canvas);
@@ -266,7 +266,7 @@ namespace TiltBrush
                     // PointerManager's pointer management is a complete mess.
                     // "5" is the most-likely to be unused. It's terrible that this
                     // needs to go through a pointer.
-                    pointer.RecreateLineFromMemory(this, pointerTransform);
+                    pointer.Core.RecreateLineFromMemory(this, pointer.transform);
                 }
             }
         }

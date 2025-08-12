@@ -10,7 +10,6 @@ namespace TiltBrush
         private BrushDescriptor m_DefaultBrush;
         private Pointer m_Pointer;
         private Canvas m_Canvas;
-        private Transform m_PointerTransform;
 
         public void Initialize(GameObject owner, TiltBrushManifest standard, TiltBrushManifest experimental,
             BrushDescriptor defaultBrush, PointerScript pointerScript)
@@ -25,7 +24,6 @@ namespace TiltBrush
             m_Canvas = canvasScript.Core;
             pointerScript.Canvas = canvasScript;
             m_Pointer = pointerScript.Core;
-            m_PointerTransform = pointerScript.transform;
             m_DefaultBrush = defaultBrush;
         }
 
@@ -97,7 +95,7 @@ namespace TiltBrush
                 m_ControlPoints = controlPoints.ToArray(),
             };
             stroke.m_ControlPointsToDrop = Enumerable.Repeat(false, stroke.m_ControlPoints.Length).ToArray();
-            stroke.Recreate(m_Pointer, tr, m_Canvas, pointerTransform: m_PointerTransform);
+            stroke.Recreate(m_Pointer, tr, m_Canvas);
         }
     }
 }

@@ -17,5 +17,4 @@
 ## Progress
 - Moved brush creation and undo cloning logic into standalone `BaseBrush` helper, further shrinking `BaseBrushScript`.
 - Extracted example scene behavior into `MinimalExampleCore` with `MinimalExample` as a stub.
-- Updated pointer and stroke core classes to depend on the standalone `Canvas` instead of `CanvasScript`, keeping MonoBehaviour stubs minimal.
 - TODO: migrate remaining brush behaviors into non-`MonoBehaviour` classes.

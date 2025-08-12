@@ -27,8 +27,8 @@ namespace TiltBrush
 
         public bool DrawingEnabled;
         private bool m_WasDrawingEnabled;
-        private Canvas m_Canvas;
-        public Canvas Canvas
+        private CanvasScript m_Canvas;
+        public CanvasScript Canvas
         {
             get => m_Canvas;
             set => m_Canvas = value;
@@ -177,15 +177,15 @@ namespace TiltBrush
 
         /// Pass a Canvas parent, and a transform in that canvas's space.
         /// If overrideDesc passed, use that for the visuals -- m_CurrentBrush does not change.
-        public void CreateNewLine(Canvas canvas, TrTransform xf_CS, BrushDescriptor overrideDesc = null)
+        public void CreateNewLine(CanvasScript canvas, TrTransform xf_CS, BrushDescriptor overrideDesc = null)
         {
             // If straightedge is enabled, we may have a minimum size requirement.
             // Initialize parametric stroke creator for our type of straightedge.
             // Maybe change the brush to a proxy brush.
             BrushDescriptor desc = overrideDesc != null ? overrideDesc : m_CurrentBrush;
 
-            m_CurrentLine = TiltBrush.BaseBrush.Create(
-                canvas.Transform, xf_CS,
+            m_CurrentLine = BaseBrush.Create(
+                canvas.transform, xf_CS,
                 desc, m_CurrentColor, m_CurrentBrushSize);
         }
 
@@ -227,7 +227,7 @@ namespace TiltBrush
             m_CurrentLine = null;
         }
 
-        public GameObject BeginLineFromMemory(Stroke stroke, Canvas canvas, Transform pointerTransform)
+        public GameObject BeginLineFromMemory(Stroke stroke, CanvasScript canvas, Transform pointerTransform)
         {
             BrushDescriptor rBrush = BrushCatalog.GetBrush(stroke.m_BrushGuid);
             if (rBrush == null)
@@ -238,7 +238,7 @@ namespace TiltBrush
 
             var cp0 = stroke.m_ControlPoints[0];
             var xf_CS = TrTransform.TRS(cp0.m_Pos, cp0.m_Orient, stroke.m_BrushScale);
-            var xf_RS = canvas.Pose * xf_CS;
+            var xf_RS = canvas.Core.Pose * xf_CS;
 
             // This transform used to be incorrect, but we didn't notice.
             // That implies this isn't necessary?
