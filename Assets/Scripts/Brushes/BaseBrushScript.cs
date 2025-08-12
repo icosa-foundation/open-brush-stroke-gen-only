@@ -63,25 +63,7 @@ namespace TiltBrush
         public const float kPreviewDuration = 0.2f; // Must be > 0 for the particles shader to work.
 
         /// Creates and properly initializes a new line.
-        /// Pass the initial transform in parent-local (Canvas) space.
-        /// Pass the size in pointer (Room) space.
-        public static BaseBrushScript Create(
-            Transform parent,
-            TrTransform xfInParentSpace,
-            BrushDescriptor desc, Color color, float size_PS)
-        {
-            GameObject line = Instantiate(desc.m_BrushPrefab);
-            line.transform.SetParent(parent);
-            Coords.AsLocal[line.transform] = TrTransform.identity;
-            line.name = desc.Description;
-
-            BaseBrushScript currentLine = line.GetComponent<BaseBrushScript>();
-            // TODO: pass this into InitBrush and do it there
-            currentLine.m_Color = color;
-            currentLine.m_BaseSize_PS = size_PS;
-            currentLine.InitBrush(desc, xfInParentSpace);
-            return currentLine;
-        }
+        /// Now handled by <see cref="BaseBrush.Create"/>.
         #endregion
 
         readonly public bool m_bCanBatch;
@@ -104,6 +86,17 @@ namespace TiltBrush
         protected BaseBrushScript(bool bCanBatch)
         {
             m_bCanBatch = bCanBatch;
+        }
+
+        internal void SetCreationState(Color color, float size_PS)
+        {
+            m_Color = color;
+            m_BaseSize_PS = size_PS;
+        }
+
+        internal void InitializeCore(BrushDescriptor desc, TrTransform localPointerXf)
+        {
+            InitBrush(desc, localPointerXf);
         }
 
         #region Accessors
@@ -130,10 +123,10 @@ namespace TiltBrush
         public float BaseSize_LS => m_BaseSize_PS * POINTER_TO_LOCAL;
 
         /// Canvas that this stroke is a part of.
-        public CanvasScript Canvas =>
+        public Canvas Canvas =>
             // Currently, all strokes are created directly under a Canvas node.
             // If that changes, we'll have to find a different way of inferring Canvas.
-            transform.parent.GetComponent<CanvasScript>();
+            transform.parent.GetComponent<CanvasScript>()?.Core;
 
         public BrushDescriptor Descriptor => m_Desc;
 
@@ -160,14 +153,7 @@ namespace TiltBrush
         /// Returns an object that implements the Undo animation
         public GameObject CloneAsUndoObject()
         {
-            GameObject clone = Instantiate(gameObject);
-            clone.name = "Undo " + clone.name;
-            clone.transform.parent = gameObject.transform.parent;
-            Coords.AsLocal[clone.transform] = Coords.AsLocal[gameObject.transform];
-            clone.SetActive(true);
-            Destroy(clone.GetComponent<BaseBrushScript>());
-            InitUndoClone(clone);
-            return clone;
+            return global::TiltBrush.BaseBrush.CloneAsUndoObject(gameObject, InitUndoClone);
         }
 
         /// Returns true if permanent geometry was generated.
