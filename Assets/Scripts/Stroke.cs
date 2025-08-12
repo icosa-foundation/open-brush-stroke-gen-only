@@ -144,7 +144,7 @@ namespace TiltBrush
                     LeftTransformControlPoints(leftTransform.Value, absoluteScale);
                 }
 
-                pointer.RecreateLineFromMemory(this);
+                pointer.Core.RecreateLineFromMemory(this, pointer.transform);
             }
             else if (canvas != null)
             {
@@ -241,12 +241,12 @@ namespace TiltBrush
             }
 
             // Invariant is:
-            //   newCanvas.Pose * newCP = prevCanvas.Pose * prevCP
+            //   newCanvas.Core.Pose * newCP = prevCanvas.Core.Pose * prevCP
             // Solve for newCp:
-            //   newCP = (newCanvas.Pose.inverse * prevCanvas.Pose) * prevCP
-            TrTransform leftTransformValue = leftTransform ?? canvas.Pose.inverse * prevCanvas.Pose;
+            //   newCP = (newCanvas.Core.Pose.inverse * prevCanvas.Core.Pose) * prevCP
+            TrTransform leftTransformValue = leftTransform ?? canvas.Core.Pose.inverse * prevCanvas.Core.Pose;
             bool bWasTransformed = leftTransform.HasValue &&
-                !TrTransform.Approximately(prevCanvas.Pose, leftTransform.Value);
+                !TrTransform.Approximately(prevCanvas.Core.Pose, leftTransform.Value);
             if (m_Type == Type.NotCreated || !bWasTransformed)
             {
                 SetParent(canvas);
@@ -266,7 +266,7 @@ namespace TiltBrush
                     // PointerManager's pointer management is a complete mess.
                     // "5" is the most-likely to be unused. It's terrible that this
                     // needs to go through a pointer.
-                    pointer.RecreateLineFromMemory(this);
+                    pointer.Core.RecreateLineFromMemory(this, pointer.transform);
                 }
             }
         }
