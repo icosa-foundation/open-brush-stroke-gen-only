@@ -19,7 +19,12 @@ namespace TiltBrush
 
     public class CanvasScript : MonoBehaviour
     {
-        public TrTransform Pose => Coords.AsGlobal[transform];
+        public Canvas Core { get; private set; }
+
+        void Awake()
+        {
+            Core = new Canvas(transform);
+        }
     }
 
 } // namespace TiltBrush
