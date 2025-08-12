@@ -13,7 +13,3 @@
 4. **Introduce core build target** – add `.csproj` files and build scripts so the standalone core can compile and run with `dotnet` without Unity.
 5. **Provide test harness** – create unit or integration tests that exercise the core library outside the Unity runtime.
 
-
-## Progress
-- Moved brush undo cloning logic into standalone `BaseBrush` helper, further shrinking `BaseBrushScript`.
-- TODO: migrate remaining brush behaviors into non-`MonoBehaviour` classes.
