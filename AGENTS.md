@@ -19,4 +19,5 @@
 - Extracted example scene behavior into `MinimalExampleCore` with `MinimalExample` as a stub.
 - Updated pointer and stroke core classes to depend on the standalone `Canvas` instead of `CanvasScript`, keeping MonoBehaviour stubs minimal.
 - Fixed `BaseBrush` helper references to use the local namespace, resolving compile errors after the helper's introduction.
+- Qualified calls to the `BaseBrush` helper with the global namespace to resolve missing-type compile errors.
 - TODO: migrate remaining brush behaviors into non-`MonoBehaviour` classes.
