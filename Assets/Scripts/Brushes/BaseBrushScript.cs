@@ -153,7 +153,7 @@ namespace TiltBrush
         /// Returns an object that implements the Undo animation
         public GameObject CloneAsUndoObject()
         {
-            return BaseBrush.CloneAsUndoObject(gameObject, InitUndoClone);
+            return TiltBrush.BaseBrush.CloneAsUndoObject(gameObject, InitUndoClone);
         }
 
         /// Returns true if permanent geometry was generated.
