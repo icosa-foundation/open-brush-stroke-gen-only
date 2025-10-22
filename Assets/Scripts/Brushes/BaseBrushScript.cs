@@ -160,14 +160,7 @@ namespace TiltBrush
         /// Returns an object that implements the Undo animation
         public GameObject CloneAsUndoObject()
         {
-            GameObject clone = Instantiate(gameObject);
-            clone.name = "Undo " + clone.name;
-            clone.transform.parent = gameObject.transform.parent;
-            Coords.AsLocal[clone.transform] = Coords.AsLocal[gameObject.transform];
-            clone.SetActive(true);
-            Destroy(clone.GetComponent<BaseBrushScript>());
-            InitUndoClone(clone);
-            return clone;
+            return BaseBrush.CloneAsUndoObject(gameObject, InitUndoClone);
         }
 
         /// Returns true if permanent geometry was generated.
