@@ -76,10 +76,8 @@ namespace TiltBrush
             line.name = desc.Description;
 
             BaseBrushScript currentLine = line.GetComponent<BaseBrushScript>();
-            // TODO: pass this into InitBrush and do it there
-            currentLine.m_Color = color;
-            currentLine.m_BaseSize_PS = size_PS;
-            currentLine.InitBrush(desc, xfInParentSpace);
+            currentLine.SetCreationState(color, size_PS);
+            currentLine.InitializeCore(desc, xfInParentSpace);
             return currentLine;
         }
         #endregion
@@ -106,6 +104,17 @@ namespace TiltBrush
             m_bCanBatch = bCanBatch;
         }
 
+        internal void SetCreationState(Color color, float size_PS)
+        {
+            m_Color = color;
+            m_BaseSize_PS = size_PS;
+        }
+
+        internal void InitializeCore(BrushDescriptor desc, TrTransform localPointerXf)
+        {
+            InitBrush(desc, localPointerXf);
+        }
+
         #region Accessors
 
         /// The size of the pointer when it created the stroke.
@@ -130,10 +139,10 @@ namespace TiltBrush
         public float BaseSize_LS => m_BaseSize_PS * POINTER_TO_LOCAL;
 
         /// Canvas that this stroke is a part of.
-        public CanvasScript Canvas =>
+        public Canvas Canvas =>
             // Currently, all strokes are created directly under a Canvas node.
             // If that changes, we'll have to find a different way of inferring Canvas.
-            transform.parent.GetComponent<CanvasScript>();
+            transform.parent.GetComponent<CanvasScript>()?.Core;
 
         public BrushDescriptor Descriptor => m_Desc;
 
