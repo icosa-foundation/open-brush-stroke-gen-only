@@ -126,6 +126,29 @@ public partial class SimpleStrokeDemo : MonoBehaviour
 }
 ```
 
+## Demo Scenes
+
+### Basic Drawing Demo (SampleScene.tscn)
+
+A simple 2D/3D drawing demo using mouse and keyboard controls:
+- **MOUSE** - Move pointer in 3D space
+- **SPACE** - Hold to draw
+- **1-5** - Change colors
+- **LEFT/RIGHT ARROW** - Cycle through brushes
+- **M** - Toggle automatic circle movement
+
+This is a great starting point to understand the basic stroke generation system.
+
+### XR Painting Demo (XRPaintingScene.tscn)
+
+An immersive VR painting experience for drawing in 3D space with VR controllers:
+- **Right Controller Trigger** - Hold to paint
+- **Move Controller** - Draw freely in 3D space
+
+This demo provides a "Tilt Brush" style experience where you can paint in virtual reality using your dominant hand controller.
+
+See **[XR_PAINTING_DEMO.md](XR_PAINTING_DEMO.md)** for detailed setup instructions, VR configuration, and extending the XR demo with additional features.
+
 ## Next Steps
 
 1. **Build and Test Compilation**

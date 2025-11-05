@@ -1,0 +1,66 @@
+[gd_scene load_steps=8 format=3 uid="uid://c5x7h8m9n0pq2"]
+
+[ext_resource type="Script" uid="uid://bup6f8v03dflc" path="res://Scenes/MinimalExample.cs" id="1_canvas"]
+[ext_resource type="Script" uid="uid://bw0lxsjnb78o1" path="res://Scripts/App.cs" id="1_app"]
+[ext_resource type="Script" uid="uid://pglwkjx5l4fg" path="res://Scripts/PointerScript.cs" id="2_pointer"]
+[ext_resource type="Script" uid="uid://phvyh04cagl3" path="res://Scripts/BrushSystemSetup.cs" id="3_setup"]
+[ext_resource type="Script" path="res://Scripts/XRPaintingController.cs" id="4_xr_controller"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_pointer"]
+radius = 0.05
+height = 0.1
+
+[sub_resource type="SphereMesh" id="SphereMesh_controller"]
+radius = 0.03
+height = 0.06
+
+[node name="XRPaintingScene" type="Node3D"]
+
+[node name="App" type="Node3D" parent="."]
+script = ExtResource("1_app")
+
+[node name="BrushSystemSetup" type="Node3D" parent="."]
+script = ExtResource("3_setup")
+
+[node name="Canvas" type="Node3D" parent="."]
+script = ExtResource("1_canvas")
+BrushSystemPath = NodePath("../BrushSystemSetup")
+PointerPath = NodePath("Pointer")
+
+[node name="Pointer" type="Node3D" parent="Canvas"]
+script = ExtResource("2_pointer")
+
+[node name="PointerVisual" type="MeshInstance3D" parent="Canvas/Pointer"]
+mesh = SubResource("SphereMesh_pointer")
+
+[node name="XROrigin3D" type="XROrigin3D" parent="."]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+
+[node name="LeftController" type="XRController3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 1.5, -0.3)
+tracker = &"left_hand"
+
+[node name="ControllerVisual" type="MeshInstance3D" parent="XROrigin3D/LeftController"]
+mesh = SubResource("SphereMesh_controller")
+
+[node name="RightController" type="XRController3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1.5, -0.3)
+tracker = &"right_hand"
+
+[node name="ControllerVisual" type="MeshInstance3D" parent="XROrigin3D/RightController"]
+mesh = SubResource("SphereMesh_controller")
+
+[node name="XRPaintingController" type="Node3D" parent="."]
+script = ExtResource("4_xr_controller")
+PointerPath = NodePath("../Canvas/Pointer")
+ControllerPath = NodePath("../XROrigin3D/RightController")
+TriggerAction = "trigger_click"
+UseRightHand = true
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 5, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
